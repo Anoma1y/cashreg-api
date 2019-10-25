@@ -29,7 +29,7 @@ class Me {
       }
 
       res.status(STATUS_CODES.OK).json({
-        data: user
+        ...user.toJSON(),
       });
     } catch (e) {
       setResponseError(res, {

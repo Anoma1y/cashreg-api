@@ -6,16 +6,29 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+      },
+      workspace_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        allowNull: false,
+        references: {
+          model: "workspaces",
+          key: "id"
+        },
       },
       name: {
-        unique: true,
         allowNull: false,
         type: Sequelize.STRING(100),
       },
       description: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING(255),
+      },
+      type: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
       },
       created_at: {
         allowNull: false,
@@ -26,7 +39,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-      }
+      },
+      deleted_at: {
+        allowNull: true,
+        type: Sequelize.DATE,
+        defaultValue: null,
+      },
     })
   },
 

@@ -52,6 +52,8 @@ export const getCurrentTimestamp = (toMs = false) => (+new Date()) * (toMs ? 100
 export const addTimestamp = (s, toMs = false) => (Math.round(new Date().getTime() / 1000) + s) * (toMs ? 1000 : 1);
 
 export const dateToUnix = (date, toMs = true) => {
+  if (date === null) return null;
+
   const toUnix = +date;
 
   return Math.floor(toUnix / (toMs ? 1000 : 1));

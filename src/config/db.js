@@ -2,9 +2,11 @@ import Config from './';
 import Sequelize from 'sequelize';
 import FileModel from '../models/File';
 import UserModel from '../models/User';
+import CategoryModel from '../models/Category';
 import SessionHistoryModel from '../models/SessionHistory';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
+import WorkspaceModel from '../models/Workspace';
 
 const sequelizeOptions = {
   host: Config.db_host,
@@ -42,6 +44,8 @@ const db = {
   File: FileModel(sequelize),
   Profile: ProfileModel(sequelize),
   Settings: SettingsModel(sequelize),
+  Category: CategoryModel(sequelize),
+  Workspace: WorkspaceModel(sequelize),
 };
 
 Object.values(db).forEach(model => {
