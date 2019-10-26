@@ -75,7 +75,18 @@ class Category {
   };
 
   editCategory = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
 
+      const { category_id } = req.params;
+      const { name, description, workspace_id, type, } = req.body;
+
+      const data = await CategoryService.edit(category_id, { name, description, workspace_id, type, });
+
+      return res.status(STATUS_CODES.OK).json(data)
+    } catch (err) {
+      return setResponseError(res, err);
+    }
   };
 }
 

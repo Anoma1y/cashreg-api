@@ -1,4 +1,4 @@
-import DB, { sequelize } from '../config/db';
+import DB from '../config/db';
 import { HttpError } from '../helpers/errorHandler';
 import STATUS_CODES from '../helpers/statusCodes';
 import ACTION_CODES from '../helpers/actionCodes';
@@ -25,7 +25,10 @@ class Category {
       const category = await DB.Category.findOne({ where: { name } });
 
       if (category) {
-        throw new HttpError(ACTION_CODES.USER_ALREADY_EXISTS, STATUS_CODES.CONFLICT);
+        throw {
+          action: ACTION_CODES.USER_ALREADY_EXISTS,
+          status: STATUS_CODES.CONFLICT,
+        };
       }
 
       return DB.Category.create({
@@ -35,7 +38,7 @@ class Category {
         type,
       });
     } catch (e) {
-      throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
+      throw new HttpError(e.action, e.status);
     }
   };
 
@@ -51,8 +54,39 @@ class Category {
     return DB.Category.destroy({ where: { id: data }, ...options });
   };
 
-  edit = async () => {
+  edit = async (category_id, data) => {
+    const { name, description, workspace_id, type, } = data;
 
+    try {
+      const category = await this.getSingle(category_id);
+
+      if (!category) {
+        throw {
+          action: ACTION_CODES.CATEGORY_NOT_FOUND,
+          status: STATUS_CODES.NOT_FOUND,
+        };
+      }
+
+      if (name) {
+        category['name'] = name;
+      }
+
+      if (description) {
+        category['description'] = description;
+      }
+
+      if (type) {
+        category['type'] = type;
+      }
+
+      if (workspace_id) {
+        category['workspace_id'] = workspace_id;
+      }
+
+      return category.save();
+    } catch (e) {
+      throw new HttpError(e.action, e.status);
+    }
   };
 }
 
