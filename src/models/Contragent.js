@@ -21,8 +21,12 @@ export default (sequelize) => {
       type: Sequelize.STRING(255),
     },
     description: {
-      allowNull: false,
-      type: Sequelize.STRING(255),
+      allowNull: true,
+      type: Sequelize.TEXT,
+    },
+    payment_info: {
+      allowNull: true,
+      type: Sequelize.TEXT,
     },
     active: {
       allowNull: false,
@@ -32,12 +36,10 @@ export default (sequelize) => {
     contrAgentInn: {
       allowNull: false,
       type: Sequelize.STRING(20),
-      defaultValue: "",
     },
     contrAgentKpp: {
       allowNull: false,
       type: Sequelize.STRING(50),
-      defaultValue: "",
     },
     created_at: {
       type: Sequelize.DATE,
@@ -65,14 +67,14 @@ export default (sequelize) => {
     deletedAt: 'deleted_at',
   };
 
-  const Category = sequelize.define("categories", attributes, options);
+  const Contragent = sequelize.define("contragents", attributes, options);
 
-  Category.associate = (models) => {
-    models.Category.belongsTo(models.Workspace, {
+  Contragent.associate = (models) => {
+    models.Contragent.belongsTo(models.Workspace, {
       onDelete: 'CASCADE',
       foreignKey: 'workspace_id'
     });
   };
 
-  return Category;
+  return Contragent;
 }

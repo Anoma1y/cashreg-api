@@ -27,6 +27,33 @@ module.exports = {
           key: "id"
         }
       },
+      // contragent_id: {
+      //   type: Sequelize.INTEGER,
+      //   onDelete: "CASCADE",
+      //   allowNull: true,
+      //   references: {
+      //     model: "contragents",
+      //     key: "id"
+      //   }
+      // },
+      category_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        allowNull: false,
+        references: {
+          model: "categories",
+          key: "id"
+        }
+      },
+      // currency_id: {
+      //   type: Sequelize.INTEGER,
+      //   onDelete: "CASCADE",
+      //   allowNull: false,
+      //   references: {
+      //     model: "currencies",
+      //     key: "id"
+      //   }
+      // },
       sum: {
         allowNull: false,
         type: Sequelize.INTEGER,
@@ -35,14 +62,19 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
       },
-      description: {
+      comment: {
         allowNull: false,
-        type: Sequelize.STRING(255),
+        type: Sequelize.TEXT,
       },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+      },
+      registered_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
       updated_at: {
         allowNull: false,

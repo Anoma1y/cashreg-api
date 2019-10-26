@@ -2,10 +2,11 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("contractors", {
+    return queryInterface.createTable("contragents", {
       id: {
         allowNull: false,
         primaryKey: true,
+        autoIncrement: true,
         type: Sequelize.INTEGER
       },
       workspace_id: {
@@ -26,8 +27,12 @@ module.exports = {
         type: Sequelize.STRING(255),
       },
       description: {
-        allowNull: false,
-        type: Sequelize.STRING(255),
+        allowNull: true,
+        type: Sequelize.TEXT,
+      },
+      payment_info: {
+        allowNull: true,
+        type: Sequelize.TEXT,
       },
       active: {
         allowNull: false,
@@ -37,12 +42,10 @@ module.exports = {
       contrAgentInn: {
         allowNull: false,
         type: Sequelize.STRING(20),
-        defaultValue: "",
       },
       contrAgentKpp: {
         allowNull: false,
         type: Sequelize.STRING(50),
-        defaultValue: "",
       },
       created_at: {
         allowNull: false,
@@ -63,6 +66,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('contractors');
+    return queryInterface.dropTable('contragents');
   }
 };

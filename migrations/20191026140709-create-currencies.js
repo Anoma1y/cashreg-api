@@ -1,22 +1,32 @@
-'use strict';
+"use strict";
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("workspaces", {
+    return queryInterface.createTable("currencies", {
       id: {
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
       name: {
-        unique: false,
-        allowNull: false,
         type: Sequelize.STRING(100),
-      },
-      is_personal: {
         allowNull: false,
-        type: Sequelize.BOOLEAN,
+      },
+      charCode: {
+        type: Sequelize.STRING(10),
+        allowNull: false,
+      },
+      numCode: {
+        type: Sequelize.STRING(100),
+        allowNull: false,
+      },
+      nominal: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      value: {
+        type: Sequelize.FLOAT,
+        allowNull: false,
       },
       created_at: {
         allowNull: false,
@@ -28,15 +38,10 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
-      deleted_at: {
-        allowNull: true,
-        type: Sequelize.DATE,
-        defaultValue: null,
-      },
-    })
+    });
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('workspaces');
+    return queryInterface.dropTable("currencies");
   }
 };

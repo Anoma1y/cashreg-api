@@ -3,6 +3,7 @@ import Sequelize from 'sequelize';
 import FileModel from '../models/File';
 import UserModel from '../models/User';
 import CategoryModel from '../models/Category';
+import ContragentModel from '../models/Contragent';
 import SessionHistoryModel from '../models/SessionHistory';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
@@ -21,7 +22,7 @@ const sequelizeOptions = {
   },
 
   underscored: true,
-  freezeTableName: true
+  freezeTableName: true,
 };
 
 export const sequelize = new Sequelize(
@@ -45,6 +46,7 @@ const db = {
   Profile: ProfileModel(sequelize),
   Settings: SettingsModel(sequelize),
   Category: CategoryModel(sequelize),
+  Contragent: ContragentModel(sequelize),
   Workspace: WorkspaceModel(sequelize),
 };
 
