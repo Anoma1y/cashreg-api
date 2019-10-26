@@ -4,6 +4,7 @@ import { dateToUnix } from "../helpers/index";
 export default (sequelize) => {
 	const attributes = {
 		name: Sequelize.STRING,
+		is_personal: Sequelize.BOOLEAN,
 		created_at: {
 			type: Sequelize.DATE,
 			get() {
