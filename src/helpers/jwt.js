@@ -1,14 +1,15 @@
 import {
     redisHSetObjectAsync,
 } from '../config/redis';
+import Config from '../config';
 import jwt from 'jsonwebtoken';
 import uuid from 'uuid/v4';
 
 export const raffinierenToken = (t, p = 'Bearer ') => t.startsWith(p) ? t.slice(p.length, t.length) : t; // todo rename this shit
 
 export const generateJWT = (data, key) => new Promise((res, rej) => {
-    const tokenLifeTime = Number(3600); // todo add to env file / constant
-    const refreshTokenLifeTime = Number(3600000); // todo add to env file / constant
+    const tokenLifeTime = Number(Config.jwt_lifetime); // todo add to env file / constant
+    const refreshTokenLifeTime = Number(Config.jwt_refresh_lifetime); // todo add to env file / constant
     const secret = uuid();
     const secretRefresh = uuid();
     const sessionKey = key ? key : `session:${data.userId}:${uuid()}`;

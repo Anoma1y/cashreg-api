@@ -3,30 +3,28 @@ import { dateToUnix } from "../helpers/index";
 
 export const attributes = {
   id: {
-    allowNull: false,
     primaryKey: true,
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-  },
-  workspace_id: {
-    type: Sequelize.INTEGER,
-    onDelete: "CASCADE",
     allowNull: false,
-    references: {
-      model: "workspaces",
-      key: "id"
-    },
+    type: Sequelize.INTEGER,
   },
   name: {
     type: Sequelize.STRING(100),
     allowNull: false,
   },
-  description: {
-    type: Sequelize.STRING(255),
-    allowNull: true,
+  charCode: {
+    type: Sequelize.STRING(10),
+    allowNull: false,
   },
-  type: {
+  numCode: {
+    type: Sequelize.STRING(100),
+    allowNull: false,
+  },
+  nominal: {
     type: Sequelize.INTEGER,
+    allowNull: false,
+  },
+  value: {
+    type: Sequelize.FLOAT,
     allowNull: false,
   },
   created_at: {
@@ -35,7 +33,7 @@ export const attributes = {
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     get() {
       return dateToUnix(this.getDataValue('created_at'))
-    },
+    }
   },
   updated_at: {
     allowNull: false,
@@ -43,15 +41,7 @@ export const attributes = {
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     get() {
       return dateToUnix(this.getDataValue('updated_at'))
-    },
-  },
-  deleted_at: {
-    allowNull: true,
-    type: Sequelize.DATE,
-    defaultValue: null,
-    get() {
-      return dateToUnix(this.getDataValue('deleted_at'))
-    },
+    }
   }
 };
 
@@ -59,17 +49,13 @@ export default (sequelize) => {
   const options = {
     updatedAt: 'updated_at',
     createdAt: 'created_at',
-    deletedAt: 'deleted_at',
   };
 
-  const Category = sequelize.define("categories", attributes, options);
+  const Currency = sequelize.define("currencies", attributes, options);
 
-  Category.associate = (models) => {
-    models.Category.belongsTo(models.Workspace, {
-      onDelete: 'CASCADE',
-      foreignKey: 'workspace_id'
-    });
+  Currency.associate = (models) => {
+
   };
 
-  return Category;
+  return Currency;
 }

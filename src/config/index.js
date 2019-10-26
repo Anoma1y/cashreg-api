@@ -9,7 +9,6 @@ export default {
 
   port: process.env.PORT || 3000,
 
-  jwt_lifetime: process.env.DEFAULT_USER_JWT_LIFETIME || 3000,
-
-  default_user_role: process.env.DEFAULT_USER_ROLE_ID || 1
+  jwt_lifetime: process.env.JWT_LIFETIME || 3000,
+  jwt_refresh_lifetime: process.env.JWT_REFRESH_LIFETIME || 300000,
 };

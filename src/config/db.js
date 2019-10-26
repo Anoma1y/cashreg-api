@@ -8,6 +8,8 @@ import SessionHistoryModel from '../models/SessionHistory';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
 import WorkspaceModel from '../models/Workspace';
+import TransactionModel from '../models/Transaction';
+import CurrencyModel from '../models/Currency';
 
 const sequelizeOptions = {
   host: Config.db_host,
@@ -48,6 +50,8 @@ const db = {
   Category: CategoryModel(sequelize),
   Contragent: ContragentModel(sequelize),
   Workspace: WorkspaceModel(sequelize),
+  Transaction: TransactionModel(sequelize),
+  Currency: CurrencyModel(sequelize),
 };
 
 Object.values(db).forEach(model => {

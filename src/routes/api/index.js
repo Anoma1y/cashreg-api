@@ -1,16 +1,20 @@
 const router = require('express').Router();
-import Session from './session';
-import File from './file';
-import User from './user';
-import Me from './me';
-import Category from './category';
-import Contragent from './contragent';
+import SessionRouter from './session';
+import FileRouter from './file';
+import UserRouter from './user';
+import MeRouter from './me';
+import CategoryRouter from './category';
+import ContragentRouter from './contragent';
+import CurrencyRouter from './currency';
+import TransactionRouter from './transaction';
 
-router.use('/session', Session);
-router.use('/file', File);
-router.use('/user', User);
-router.use('/me', Me);
-router.use('/category', Category);
-router.use('/contragent', Contragent);
+router.use('/session', SessionRouter);
+router.use('/file', FileRouter);
+router.use('/user', UserRouter);
+router.use('/me', MeRouter);
+router.use('/category', CategoryRouter);
+router.use('/contragent', ContragentRouter);
+router.use('/currency', CurrencyRouter);
+router.use('/transaction', TransactionRouter);
 
 export default router;
