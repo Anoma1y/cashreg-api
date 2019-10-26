@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("transactions", {
+    return queryInterface.createTable("contractors", {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -17,14 +17,32 @@ module.exports = {
           key: "id"
         }
       },
-      name: {
-        unique: true,
+      title: {
         allowNull: false,
+        type: Sequelize.STRING(100),
+      },
+      longTitle: {
+        allowNull: true,
         type: Sequelize.STRING(255),
       },
       description: {
         allowNull: false,
         type: Sequelize.STRING(255),
+      },
+      active: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
+        defaultValue: true,
+      },
+      contrAgentInn: {
+        allowNull: false,
+        type: Sequelize.STRING(20),
+        defaultValue: "",
+      },
+      contrAgentKpp: {
+        allowNull: false,
+        type: Sequelize.STRING(50),
+        defaultValue: "",
       },
       created_at: {
         allowNull: false,
@@ -36,10 +54,15 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
+      deleted_at: {
+        allowNull: true,
+        type: Sequelize.DATE,
+        defaultValue: null,
+      },
     })
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('transactions');
+    return queryInterface.dropTable('contractors');
   }
 };

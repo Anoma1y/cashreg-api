@@ -8,7 +8,7 @@ class Category {
     if (typeof data === 'object') {
       return DB.Category.findOne({
         where: {
-          ...data
+          ...data,
         }, ...options
       });
     }
