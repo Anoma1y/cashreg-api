@@ -27,15 +27,15 @@ module.exports = {
           key: "id"
         }
       },
-      // contragent_id: {
-      //   type: Sequelize.INTEGER,
-      //   onDelete: "CASCADE",
-      //   allowNull: true,
-      //   references: {
-      //     model: "contragents",
-      //     key: "id"
-      //   }
-      // },
+      contragent_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        allowNull: true,
+        references: {
+          model: "contragents",
+          key: "id"
+        }
+      },
       category_id: {
         type: Sequelize.INTEGER,
         onDelete: "CASCADE",
@@ -45,15 +45,15 @@ module.exports = {
           key: "id"
         }
       },
-      // currency_id: {
-      //   type: Sequelize.INTEGER,
-      //   onDelete: "CASCADE",
-      //   allowNull: false,
-      //   references: {
-      //     model: "currencies",
-      //     key: "id"
-      //   }
-      // },
+      currency_id: {
+        type: Sequelize.INTEGER,
+        onDelete: "CASCADE",
+        allowNull: false,
+        references: {
+          model: "currencies",
+          key: "id"
+        }
+      },
       sum: {
         allowNull: false,
         type: Sequelize.INTEGER,

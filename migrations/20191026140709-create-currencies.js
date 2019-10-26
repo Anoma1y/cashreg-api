@@ -4,9 +4,9 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable("currencies", {
       id: {
-        allowNull: false,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        allowNull: false,
+        type: Sequelize.INTEGER,
       },
       name: {
         type: Sequelize.STRING(100),
