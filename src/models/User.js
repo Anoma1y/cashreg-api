@@ -45,6 +45,11 @@ export default (sequelize) => {
       onDelete: 'CASCADE',
       foreignKey: 'user_id'
     })
+
+    models.Transaction.belongsTo(models.User, {
+      onDelete: 'CASCADE',
+      foreignKey: 'user_id'
+    });
   };
 
   return User;

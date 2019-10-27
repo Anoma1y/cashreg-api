@@ -109,30 +109,7 @@ export default (sequelize) => {
 	const Transaction = sequelize.define("transactions", attributes, options);
 
 	Transaction.associate = (models) => {
-		models.Transaction.hasOne(models.Category, {
-			onDelete: 'CASCADE',
-			foreignKey: 'id'
-		});
 
-		models.Transaction.hasOne(models.Contragent, {
-			onDelete: 'CASCADE',
-			foreignKey: 'id'
-		});
-
-		models.Transaction.hasOne(models.Currency, {
-			onDelete: 'CASCADE',
-			foreignKey: 'id'
-		});
-
-		models.Transaction.hasOne(models.Workspace, {
-			onDelete: 'CASCADE',
-			foreignKey: 'id'
-		});
-
-		models.Transaction.hasOne(models.User, {
-			onDelete: 'CASCADE',
-			foreignKey: 'id'
-		});
 	};
 
 	return Transaction;

@@ -65,9 +65,14 @@ export default (sequelize) => {
   const Category = sequelize.define("categories", attributes, options);
 
   Category.associate = (models) => {
-    models.Category.belongsTo(models.Workspace, {
+    // models.Category.belongsTo(models.Workspace, {
+    //   onDelete: 'CASCADE',
+    //   foreignKey: 'workspace_id'
+    // });
+
+    models.Transaction.belongsTo(models.Category, {
       onDelete: 'CASCADE',
-      foreignKey: 'workspace_id'
+      foreignKey: 'category_id',
     });
   };
 

@@ -86,6 +86,11 @@ export default (sequelize) => {
       onDelete: 'CASCADE',
       foreignKey: 'workspace_id'
     });
+
+    models.Transaction.belongsTo(models.Contragent, {
+      onDelete: 'CASCADE',
+      foreignKey: 'contragent_id'
+    });
   };
 
   return Contragent;

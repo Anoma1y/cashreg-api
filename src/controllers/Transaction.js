@@ -17,7 +17,24 @@ class Transaction {
     try {
       await checkValidationErrors(req);
 
-      const total_records = await DB.Transaction.count();
+      const {
+        register_date_start,
+        register_date_end,
+        sum_from,
+        sum_to,
+        currency_id,
+        category_id,
+        contragent_id,
+        type,
+        order_by_direction,
+        order_by_key,
+      } = req.query;
+
+      const where = {
+        // category_id: 2,
+      };
+
+      const total_records = await DB.Transaction.count({ where });
       const { page, num_on_page, offset, limit } = getPagination(req, total_records);
 
       const data = await TransactionService.getList({
@@ -26,35 +43,47 @@ class Transaction {
         attributes: {
           exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
         },
-        include: [{
-          model: DB.Category,
-          attributes: {
-            exclude: ['workspace_id'],
-          },
-        }, {
-          model: DB.Currency,
-          attributes: {
-            exclude: ['created_at', 'updated_at'],
-          },
-        }, {
-          model: DB.Contragent,
-          attributes: {
-            exclude: ['workspace_id', 'created_at', 'updated_at'],
-          },
-        }, {
-          model: DB.Workspace,
-        }, {
-          model: DB.User,
-          attributes: {
-            exclude: ['password', 'created_at', 'updated_at'],
-          },
-          include: [{
-            model: DB.Profile,
+        where,
+        include: [
+          {
+            model: DB.Category,
             attributes: {
-              exclude: ['created_at', 'updated_at', 'id'],
+              exclude: ['workspace_id', 'created_at', 'updated_at', 'deleted_at'],
             },
-          }]
-        }],
+          },
+          {
+            model: DB.Currency,
+            attributes: {
+              exclude: ['created_at', 'updated_at'],
+            },
+          },
+          {
+            model: DB.Contragent,
+            attributes: {
+              exclude: ['workspace_id', 'created_at', 'updated_at'],
+            },
+          },
+          {
+            model: DB.Workspace,
+            attributes: {
+              exclude: ['created_at', 'updated_at', 'deleted_at'],
+            },
+          },
+          {
+            model: DB.User,
+            attributes: {
+              exclude: ['password', 'created_at', 'updated_at'],
+            },
+            include: [
+              {
+                model: DB.Profile,
+                attributes: {
+                  exclude: ['created_at', 'updated_at', 'id'],
+                },
+              },
+            ],
+          },
+        ],
         json:true,
       });
 

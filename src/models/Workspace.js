@@ -38,6 +38,11 @@ export default (sequelize) => {
 			onDelete: 'CASCADE',
 			foreignKey: 'workspace_id'
 		});
+
+		models.Transaction.belongsTo(models.Workspace, {
+			onDelete: 'CASCADE',
+			foreignKey: 'workspace_id'
+		});
 	};
 
 	return Workspace;

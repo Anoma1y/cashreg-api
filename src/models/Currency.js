@@ -54,7 +54,9 @@ export default (sequelize) => {
   const Currency = sequelize.define("currencies", attributes, options);
 
   Currency.associate = (models) => {
-
+    models.Transaction.belongsTo(models.Currency, {
+      foreignKey: 'currency_id',
+    });
   };
 
   return Currency;
