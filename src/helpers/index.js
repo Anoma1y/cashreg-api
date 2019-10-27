@@ -58,3 +58,11 @@ export const dateToUnix = (date, toMs = true) => {
 
   return Math.floor(toUnix / (toMs ? 1000 : 1));
 };
+
+export const removeEmpty = (obj) => {
+  const modObj = { ...obj };
+
+  Object.keys(modObj).forEach((key) => (modObj[key] === undefined || modObj[key] === '' || modObj[key] === null ? delete modObj[key] : modObj[key]));
+
+  return modObj;
+};
