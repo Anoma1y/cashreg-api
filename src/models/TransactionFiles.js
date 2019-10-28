@@ -8,25 +8,25 @@ export const attributes = {
 		primaryKey: true,
 		type: Sequelize.INTEGER
 	},
-	workspace_id: {
+	transaction_id: {
 		allowNull: false,
 		primaryKey: true,
 		type: Sequelize.INTEGER,
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 		references: {
-			model: "workspaces",
+			model: "transactions",
 			key: "id"
 		}
 	},
-	user_id: {
+	file_id: {
 		allowNull: false,
 		primaryKey: true,
 		type: Sequelize.INTEGER,
 		onDelete: 'CASCADE',
 		onUpdate: 'CASCADE',
 		references: {
-			model: "users",
+			model: "files",
 			key: "id"
 		}
 	},
@@ -67,19 +67,19 @@ export default (sequelize) => {
 		deletedAt: 'deleted_at',
 	};
 
-	const Workspace = sequelize.define("workspace_users", attributes, options);
+	const TransactionFiles = sequelize.define("transaction_files", attributes, options);
 
-	Workspace.associate = (models) => {
-		models.Workspace.hasOne(models.Category, {
-			onDelete: 'CASCADE',
-			foreignKey: 'workspace_id'
-		});
+	// TransactionFiles.associate = (models) => {
+	// 	models.TransactionFiles.hasOne(models.Category, {
+	// 		onDelete: 'CASCADE',
+	// 		foreignKey: 'workspace_id'
+	// 	});
+	//
+	// 	models.Transaction.belongsTo(models.TransactionFiles, {
+	// 		onDelete: 'CASCADE',
+	// 		foreignKey: 'workspace_id'
+	// 	});
+	// };
 
-		models.Transaction.belongsTo(models.Workspace, {
-			onDelete: 'CASCADE',
-			foreignKey: 'workspace_id'
-		});
-	};
-
-	return Workspace;
+	return TransactionFiles;
 }

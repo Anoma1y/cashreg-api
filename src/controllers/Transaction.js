@@ -16,6 +16,47 @@ import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
 
 class Transaction {
+  static TransactionInclude = [
+    {
+      model: DB.Category,
+      attributes: {
+        exclude: ['workspace_id', 'created_at', 'updated_at', 'deleted_at'],
+      },
+    },
+    {
+      model: DB.Currency,
+      attributes: {
+        exclude: ['created_at', 'updated_at'],
+      },
+    },
+    {
+      model: DB.Contragent,
+      attributes: {
+        exclude: ['workspace_id', 'created_at', 'updated_at'],
+      },
+    },
+    {
+      model: DB.Workspace,
+      attributes: {
+        exclude: ['created_at', 'updated_at', 'deleted_at'],
+      },
+    },
+    {
+      model: DB.User,
+      attributes: {
+        exclude: ['password', 'created_at', 'updated_at'],
+      },
+      include: [
+        {
+          model: DB.Profile,
+          attributes: {
+            exclude: ['created_at', 'updated_at', 'id'],
+          },
+        },
+      ],
+    },
+  ];
+
   getTransactionList = async (req, res) => {
     try {
       await checkValidationErrors(req);
@@ -39,6 +80,10 @@ class Transaction {
         contragent_id,
         type,
       });
+
+      where['invalidated_at'] = {
+        [Op.eq]: null,
+      };
 
       if (sum_from && sum_to) {
         where['sum'] = {
@@ -92,46 +137,7 @@ class Transaction {
         },
         where,
         order,
-        include: [
-          {
-            model: DB.Category,
-            attributes: {
-              exclude: ['workspace_id', 'created_at', 'updated_at', 'deleted_at'],
-            },
-          },
-          {
-            model: DB.Currency,
-            attributes: {
-              exclude: ['created_at', 'updated_at'],
-            },
-          },
-          {
-            model: DB.Contragent,
-            attributes: {
-              exclude: ['workspace_id', 'created_at', 'updated_at'],
-            },
-          },
-          {
-            model: DB.Workspace,
-            attributes: {
-              exclude: ['created_at', 'updated_at', 'deleted_at'],
-            },
-          },
-          {
-            model: DB.User,
-            attributes: {
-              exclude: ['password', 'created_at', 'updated_at'],
-            },
-            include: [
-              {
-                model: DB.Profile,
-                attributes: {
-                  exclude: ['created_at', 'updated_at', 'id'],
-                },
-              },
-            ],
-          },
-        ],
+        include: Transaction.TransactionInclude,
         json:true,
       });
 
@@ -144,6 +150,47 @@ class Transaction {
     } catch (err) {
       return setResponseError(res, err);
     }
+  };
+
+  getTransactionSingle = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
+
+      const { transaction_id } = req.params;
+      const transaction = await TransactionService.getSingle(transaction_id, {
+        attributes: {
+          exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
+        },
+        include: Transaction.TransactionInclude,
+        json: true,
+      });
+
+      if (!transaction) {
+        return res.status(STATUS_CODES.NOT_FOUND).send()
+      }
+
+      return res.status(STATUS_CODES.OK).json(transaction);
+    } catch (err) {
+      return setResponseError(res, err);
+    }
+  };
+
+  createTransaction = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
+
+      const transaction = await TransactionService.createTransaction(req.body);
+
+      return res.status(STATUS_CODES.CREATED).json(transaction);
+    } catch (err) {
+      return setResponseError(res, err)
+    }
+  };
+  editTransaction = async (req, res) => {
+
+  };
+  deleteTransaction = async (req, res) => {
+
   };
 
   getSummary = async (req, res) => {

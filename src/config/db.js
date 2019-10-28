@@ -10,6 +10,7 @@ import SettingsModel from '../models/Settings';
 import WorkspaceModel from '../models/Workspace';
 import WorkspaceUsersModel from '../models/WorkspaceUsers';
 import TransactionModel from '../models/Transaction';
+import TransactionFilesModel from '../models/TransactionFiles';
 import CurrencyModel from '../models/Currency';
 
 const sequelizeOptions = {
@@ -53,6 +54,7 @@ const db = {
   Workspace: WorkspaceModel(sequelize),
   WorkspaceUsers: WorkspaceUsersModel(sequelize),
   Transaction: TransactionModel(sequelize),
+  TransactionFiles: TransactionFilesModel(sequelize),
   Currency: CurrencyModel(sequelize),
 };
 

@@ -11,3 +11,5 @@ export const checkTransactionType = type => {
 
 	throw new Error(ACTION_CODES.WRONG_TRANSACTION_TYPE)
 };
+
+export const aboveZero = val => val > 0;

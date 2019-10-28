@@ -1,6 +1,10 @@
 import { Op } from 'sequelize';
 import DB from '../config/db';
 import {
+  redisSetAsync,
+  redisGetAsync,
+} from '../config/redis';
+import {
   errorFormatter,
   HttpError,
   setResponseError,
@@ -14,6 +18,7 @@ import { removeEmpty } from '../helpers';
 import { validationResult } from 'express-validator/check';
 import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
+import uuid from 'uuid/v4';
 
 class Cash {
   getCash = async (req, res) => {
@@ -22,15 +27,43 @@ class Cash {
 
       const {
         query: {
-          workspace_id,
           currency_id,
+          category_id,
+          contragent_id,
+          type,
+          date_from,
+          date_to,
+          workspace_id,
         },
         decoded: {
           userId: user_id,
         }
       } = req;
 
-      const cash = await CashService.getCash({ workspace_id, currency_id, user_id });
+      let cash = [];
+
+      const isFilter = Object.keys(removeEmpty({
+        currency_id,
+        category_id,
+        contragent_id,
+        type,
+        date_from,
+        date_to
+      })).length !== 0;
+
+      if (isFilter) {
+        cash = await CashService.getCash({ user_id, query: req.query });
+      } else {
+        const cacheCash = null /*await redisGetAsync(`cash:${workspace_id}`);*/
+
+        if (cacheCash) {
+          cash = JSON.parse(cacheCash);
+        } else {
+          cash = await CashService.getCash({ user_id, query: { workspace_id } });
+
+          await redisSetAsync(`cash:${workspace_id}`, JSON.stringify(cash), 'EX', 3600);
+        }
+      }
 
       return res.status(STATUS_CODES.OK).json(cash);
     } catch (err) {

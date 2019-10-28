@@ -1,73 +1,69 @@
 import DB from '../config/db';
+import Config from '../config';
 import { Op } from 'sequelize';
 import ACTION_CODES from "../helpers/actionCodes";
 import { HttpError, setResponseError } from "../helpers/errorHandler";
-import { generateFileName, getFileNameExt, uploadFile } from '../helpers';
+import { generateFileName, getFileNameExt } from '../helpers';
 import STATUS_CODES from "../helpers/statusCodes";
+import AWS from 'aws-sdk';
+import multer from 'multer';
+import multerS3 from 'multer-s3';
 
-const FILE_LIMIT = 4;
-const AVAILABLE_MIMETYPES = ['image/jpeg', 'image/jpg', 'image/png'];
+const endpoint = new AWS.Endpoint('https://fra1.digitaloceanspaces.com');
 
-const isUploadedFile = (file) => typeof file === 'object' && file.name !== undefined;
+const s3 = new AWS.S3({
+  endpoint,
+  accessKeyId: Config.DIGITAL_OCEAN_SPACES_ACCESS_KEY,
+  secretAccessKey: Config.DIGITAL_OCEAN_SPACES_SECRET_KEY,
+});
+
+const fileUploader = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: Config.DIGITAL_OCEAN_SPACES_BUCKET_NAME,
+    acl: "public-read",
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function(req, file, cb) {
+      const { originalname } = file;
+
+      const fileExtension = getFileNameExt(originalname);
+      const fileName = generateFileName(originalname);
+      const fileFullName = `${fileName}.${fileExtension}`;
+      const filePath = `cashreg/uploads/transactions/${fileFullName}`;
+
+      cb(null, filePath);
+    },
+  }),
+  limits: { fileSize: 3000000 },
+}).single("file");
+
 
 class File {
-  uploadFile = async (req, res) => {
-    if (!req.files || Object.keys(req.files).length === 0) {
-        return setResponseError(res, {
-          action: ACTION_CODES.FILE_UPLOAD_NOT_FOUND,
-          status: STATUS_CODES.UNPROCESSABLE_ENTITY,
-          extra: {}
+  uploadFile = (req, res) => {
+
+    fileUploader(req, res, async err => {
+      if (err) {
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+          action: ACTION_CODES.FILE_UPLOAD_ERROR
         })
-    }
-
-    if (typeof req.files === 'object') {
-      const fileField = req.files.file;
-      const fileSize = fileField.data.length;
-
-      if (isUploadedFile(fileField)) {
-        if (!AVAILABLE_MIMETYPES.includes(fileField.mimetype)) {
-          return setResponseError(res, {
-            action: ACTION_CODES.FILE_TYPE_NOT_SUPPORTED,
-            status: STATUS_CODES.UNPROCESSABLE_ENTITY,
-            extra: {}
-          })
-        }
-
-        if (fileSize > FILE_LIMIT * 1024 * 1024) {
-          return setResponseError(res, {
-            action: ACTION_CODES.FILE_TOO_BIG,
-            status: STATUS_CODES.UNPROCESSABLE_ENTITY,
-            extra: {}
-          })
-        }
-
-        const fileExtension = getFileNameExt(fileField.name);
-        const fileName = generateFileName();
-        const fileFullName = `${fileName}.${fileExtension}`;
-        const originalURI = '/uploads/' + fileFullName;
-        const uploadPath = process.cwd() + originalURI;
-
-        try {
-          await uploadFile(fileField, uploadPath);
-
-          const fileCreate = await DB.File.create({
-            original_name: fileName,
-            extension: fileExtension,
-            size: fileSize,
-            original_uri: originalURI,
-            preview_uri: originalURI, // todo добавить сжатие/уменьшение размеров
-          });
-
-          return res.status(STATUS_CODES.CREATED).json({
-            action: ACTION_CODES.FILE_UPLOAD,
-            data: fileCreate
-          });
-        } catch (err) {
-          return setResponseError(res, err);
-        }
-
       }
-    }
+
+      try {
+        const { file } = req;
+
+        const createFile = await DB.File.create({
+          original_name: file.key.split('/').pop(),
+          extension: file.contentType,
+          size: file.size,
+          original_uri: file.location,
+          preview_uri: file.location,
+        });
+
+        return res.status(STATUS_CODES.OK).json(createFile)
+      } catch (e) {
+        return setResponseError(res, err);
+      }
+    });
   };
 
   getFile = async (req, res) => {

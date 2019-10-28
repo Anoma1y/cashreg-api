@@ -89,21 +89,21 @@ export const attributes = {
 			return dateToUnix(this.getDataValue('updated_at'))
 		},
 	},
-	deleted_at: {
+	invalidated_at: {
 		allowNull: true,
 		type: Sequelize.DATE,
 		defaultValue: null,
 		get() {
-			return dateToUnix(this.getDataValue('deleted_at'))
+			return dateToUnix(this.getDataValue('invalidated_at'))
 		},
-	}
+	},
 };
 
 export default (sequelize) => {
 	const options = {
 		updatedAt: 'updated_at',
 		createdAt: 'created_at',
-		deletedAt: 'deleted_at',
+		invalidatedAt: 'invalidated_at',
 	};
 
 	const Transaction = sequelize.define("transactions", attributes, options);

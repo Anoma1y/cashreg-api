@@ -35,14 +35,16 @@ export const uploadFile = (file, uploadPath) =>
     });
   });
 
-export const generateFileName = () => {
+export const generateFileName = originalname => {
   const str = uuid();
+  const ext = getFileNameExt(originalname)
+  const cutExtName = originalname.slice(0, -(ext.length + 1));
 
-  return str.replace(/-/g, '');
+  return `${str.replace(/-/g, '').slice(0, 20)}-${cutExtName}`;
 };
 
-export const getFileNameExt = (str) => {
-  const file = str.split('/').pop();
+export const getFileNameExt = originalname => {
+  const file = originalname.split('/').pop();
 
   return file.substr(file.lastIndexOf('.') + 1, file.length);
 };

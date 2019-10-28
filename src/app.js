@@ -15,7 +15,7 @@ const limiter = new rateLimit({
 });
 
 app.use(limiter);
-app.use(fileUpload({ debug: true }));
+// app.use(fileUpload({ debug: true }));
 app.use(
   bodyParser.urlencoded({
     extended: true
