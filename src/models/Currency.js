@@ -7,6 +7,11 @@ export const attributes = {
     allowNull: false,
     type: Sequelize.INTEGER,
   },
+  enabled: {
+    type: Sequelize.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
+  },
   name: {
     type: Sequelize.STRING(100),
     allowNull: false,

@@ -15,6 +15,11 @@ module.exports = {
       returning: true
     });
 
+    const org_workspace = await DB.Workspace.create({
+      name: 'onixdev',
+      is_personal: false,
+    });
+
     await Promise.all(users.map(async user => {
       await queryInterface.bulkInsert('profiles', [{
         user_id: user.id,
@@ -34,18 +39,19 @@ module.exports = {
         user_id: user.id,
         permissions: 0,
       }], {});
+
+      await queryInterface.bulkInsert('workspace_users', [{
+        workspace_id: org_workspace.id,
+        user_id: user.id,
+        permissions: 0,
+      }], {});
     }));
 
     await queryInterface.bulkInsert('currencies', [
-      { id: 1, name: 'Российский рубль', charCode: 'RUR', numCode: '123', nominal: 1, value: 1, },
-      { id: 2, name: 'Американский доллар', charCode: 'USD', numCode: '456', nominal: 1, value: 65.44, },
-      { id: 3, name: 'Евро', charCode: 'EUR', numCode: '789', nominal: 1, value: 71.14, },
+      { id: 1, enabled: true, name: 'Российский рубль', charCode: 'RUR', numCode: '123', nominal: 1, value: 1, },
+      { id: 2, enabled: true, name: 'Американский доллар', charCode: 'USD', numCode: '456', nominal: 1, value: 65.44, },
+      { id: 3, enabled: true, name: 'Евро', charCode: 'EUR', numCode: '789', nominal: 1, value: 71.14, },
     ], {});
-
-    await queryInterface.bulkInsert('workspaces', [{
-      name: 'onixdev',
-      is_personal: false,
-    }], {});
 
     const workspaces = await DB.Workspace.findAll({
       json: true

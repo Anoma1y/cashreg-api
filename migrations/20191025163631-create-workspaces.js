@@ -1,4 +1,5 @@
 'use strict';
+import { attributes } from '../src/models/Workspace';
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

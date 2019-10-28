@@ -8,6 +8,7 @@ import SessionHistoryModel from '../models/SessionHistory';
 import ProfileModel from '../models/Profile';
 import SettingsModel from '../models/Settings';
 import WorkspaceModel from '../models/Workspace';
+import WorkspaceUsersModel from '../models/WorkspaceUsers';
 import TransactionModel from '../models/Transaction';
 import CurrencyModel from '../models/Currency';
 
@@ -50,6 +51,7 @@ const db = {
   Category: CategoryModel(sequelize),
   Contragent: ContragentModel(sequelize),
   Workspace: WorkspaceModel(sequelize),
+  WorkspaceUsers: WorkspaceUsersModel(sequelize),
   Transaction: TransactionModel(sequelize),
   Currency: CurrencyModel(sequelize),
 };

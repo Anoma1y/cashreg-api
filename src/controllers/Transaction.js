@@ -13,6 +13,7 @@ import { getPagination } from '../helpers/pagination';
 import { removeEmpty } from '../helpers';
 import { validationResult } from 'express-validator/check';
 import TransactionService from '../services/transaction';
+import CashService from '../services/cash';
 
 class Transaction {
   getTransactionList = async (req, res) => {
@@ -141,10 +142,37 @@ class Transaction {
         total_records
       });
     } catch (err) {
-      console.log(err)
       return setResponseError(res, err);
     }
   };
+
+  getSummary = async (req, res) => {
+    try {
+      const cash = await CashService.getCash({
+        workspace_id: 1,
+        user_id: req.decoded.userId,
+      })
+      // return res.status(STATUS_CODES.OK).json({
+      //   accrualAmount: 0,
+      //   accrualCount: 0,
+      //   accrualFullAmount: 0,
+      //   incomeAmount: 9810000,
+      //   incomeCount: 32,
+      //   incomeFullAmount: 9810000,
+      //   moveAmount: 0,
+      //   moveCount: 4,
+      //   moveFullAmount: 0,
+      //   outcomeAmount: 9530395,
+      //   outcomeCount: 161,
+      //   outcomeFullAmount: 9530395,
+      // });
+    } catch (err) {
+      return setResponseError(res, err);
+    }
+
+    // CashService
+
+  }
 }
 
 export default new Transaction();

@@ -8,14 +8,31 @@ export const attributes = {
 		primaryKey: true,
 		type: Sequelize.INTEGER
 	},
-	name: {
-		unique: false,
+	workspace_id: {
 		allowNull: false,
-		type: Sequelize.STRING(100),
+		primaryKey: true,
+		type: Sequelize.INTEGER,
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+		references: {
+			model: "workspaces",
+			key: "id"
+		}
 	},
-	is_personal: {
+	user_id: {
 		allowNull: false,
-		type: Sequelize.BOOLEAN,
+		primaryKey: true,
+		type: Sequelize.INTEGER,
+		onDelete: 'CASCADE',
+		onUpdate: 'CASCADE',
+		references: {
+			model: "users",
+			key: "id"
+		}
+	},
+	permissions: {
+		allowNull: false,
+		type: Sequelize.INTEGER,
 	},
 	created_at: {
 		allowNull: false,
@@ -23,7 +40,7 @@ export const attributes = {
 		defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
 		get() {
 			return dateToUnix(this.getDataValue('created_at'))
-		}
+		},
 	},
 	updated_at: {
 		allowNull: false,
@@ -31,16 +48,16 @@ export const attributes = {
 		defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
 		get() {
 			return dateToUnix(this.getDataValue('updated_at'))
-		}
+		},
 	},
 	deleted_at: {
 		allowNull: true,
 		type: Sequelize.DATE,
 		defaultValue: null,
 		get() {
-			return dateToUnix(this.getDataValue('deleted_at'))
-		}
-	}
+			return dateToUnix(this.getDataValue('deleted'))
+		},
+	},
 };
 
 export default (sequelize) => {
@@ -50,7 +67,7 @@ export default (sequelize) => {
 		deletedAt: 'deleted_at',
 	};
 
-	const Workspace = sequelize.define("workspaces", attributes, options);
+	const Workspace = sequelize.define("workspace_users", attributes, options);
 
 	Workspace.associate = (models) => {
 		models.Workspace.hasOne(models.Category, {
