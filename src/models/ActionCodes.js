@@ -17,10 +17,27 @@ export const attributes = {
       key: "id"
     }
   },
-  show_penny: {
-    type: Sequelize.BOOLEAN,
+  type: {
     allowNull: false,
-    defaultValue: false,
+    type: Sequelize.INTEGER
+  },
+  code: {
+    allowNull: false,
+    type: Sequelize.STRING(200)
+  },
+  expires_at: {
+    type: Sequelize.DATE,
+    get() {
+      return dateToUnix(this.getDataValue('expires_at'))
+    }
+  },
+  claimed_at: {
+    allowNull: true,
+    type: Sequelize.DATE,
+    defaultValue: null,
+    get() {
+      return dateToUnix(this.getDataValue('claimed_at'))
+    }
   },
   created_at: {
     allowNull: false,
@@ -28,7 +45,7 @@ export const attributes = {
     defaultValue: Sequelize.NOW,
     get() {
       return dateToUnix(this.getDataValue('created_at'))
-    },
+    }
   },
   updated_at: {
     allowNull: false,
@@ -36,24 +53,26 @@ export const attributes = {
     defaultValue: Sequelize.NOW,
     get() {
       return dateToUnix(this.getDataValue('updated_at'))
-    },
+    }
   }
 };
 
 export default (sequelize) => {
   const options = {
+    expiresAt: 'expires_at',
+    claimedAt: 'claimed_at',
     updatedAt: 'updated_at',
-    createdAt: 'created_at'
+    createdAt: 'created_at',
   };
 
-  const Settings = sequelize.define("settings", attributes, options);
+  const ActionCodes = sequelize.define("action_codes", attributes, options);
 
-  Settings.associate = (models) => {
-    models.Settings.belongsTo(models.User, {
+  ActionCodes.associate = (models) => {
+    models.ActionCodes.belongsTo(models.User, {
       onDelete: 'CASCADE',
       foreignKey: 'user_id'
     })
   };
 
-  return Settings;
+  return ActionCodes;
 }

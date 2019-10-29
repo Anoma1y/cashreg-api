@@ -7,10 +7,14 @@ module.exports = {
       login: 'admin',
       email: 'admin@example.com',
       password: '$2b$10$wsglrIQW7sFQJUNv14O5AudrqK7Q0vCf.JFbIW4gVtj4JJ92jO0he',
+      created_at: new Date(),
+      updated_at: new Date(),
     }, {
       login: 'testuser',
       email: 'testuser@example.com',
       password: '$2b$10$wsglrIQW7sFQJUNv14O5AudrqK7Q0vCf.JFbIW4gVtj4JJ92jO0he',
+      created_at: new Date(),
+      updated_at: new Date(),
     }], {
       returning: true
     });
@@ -18,41 +22,55 @@ module.exports = {
     const org_workspace = await DB.Workspace.create({
       name: 'onixdev',
       is_personal: false,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
 
-    await Promise.all(users.map(async user => {
+    await Promise.all(users.map(async (user, idx) => {
       await queryInterface.bulkInsert('profiles', [{
         user_id: user.id,
+        is_email_verified: idx === 0,
+        is_blocked: false,
+        created_at: new Date(),
+        updated_at: new Date(),
       }], {});
 
       await queryInterface.bulkInsert('settings', [{
         user_id: user.id,
+        created_at: new Date(),
+        updated_at: new Date(),
       }], {});
 
       const workspace = await DB.Workspace.create({
         name: user.email,
         is_personal: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       }, { returning: true, });
 
       await queryInterface.bulkInsert('workspace_users', [{
         workspace_id: workspace.id,
         user_id: user.id,
         permissions: 0,
+        created_at: new Date(),
+        updated_at: new Date(),
       }], {});
 
       await queryInterface.bulkInsert('workspace_users', [{
         workspace_id: org_workspace.id,
         user_id: user.id,
         permissions: 0,
+        created_at: new Date(),
+        updated_at: new Date(),
       }], {});
     }));
 
     await queryInterface.bulkInsert('currencies', [
-      { id: 1, enabled: true, name: 'Российский рубль', charCode: 'RUR', numCode: '123', nominal: 1, value: 1, },
-      { id: 2, enabled: true, name: 'Американский доллар', charCode: 'USD', numCode: '456', nominal: 1, value: 65.44, },
-      { id: 3, enabled: true, name: 'Евро', charCode: 'EUR', numCode: '789', nominal: 1, value: 71.14, },
+      { id: 1, enabled: true, name: 'Российский рубль', charCode: 'RUR', numCode: '123', nominal: 1, value: 1, created_at: new Date(), updated_at: new Date() },
+      { id: 2, enabled: true, name: 'Американский доллар', charCode: 'USD', numCode: '456', nominal: 1, value: 65.44, created_at: new Date(), updated_at: new Date() },
+      { id: 3, enabled: true, name: 'Евро', charCode: 'EUR', numCode: '789', nominal: 1, value: 71.14, created_at: new Date(), updated_at: new Date() },
     ], {});
-
+    //
     const workspaces = await DB.Workspace.findAll({
       json: true
     });
@@ -63,16 +81,22 @@ module.exports = {
           workspace_id: workspace.id,
           name: 'Оплата налогов',
           type: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
         {
           workspace_id: workspace.id,
           name: 'Оплата аренды',
           type: 1,
+          created_at: new Date(),
+          updated_at: new Date(),
         },
         {
           workspace_id: workspace.id,
           name: 'Возврат долга',
           type: 2,
+          created_at: new Date(),
+          updated_at: new Date(),
         }
       ], {});
 
@@ -85,6 +109,8 @@ module.exports = {
           payment_info: 'Карта 4544 4444 7787 9999',
           contrAgentInn: '454578787876',
           contrAgentKpp: '6768786786768744',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
         {
           workspace_id: workspace.id,
@@ -94,6 +120,8 @@ module.exports = {
           payment_info: 'Карта 3334 4444 4154 9999',
           contrAgentInn: '432222787876',
           contrAgentKpp: '6768786786768744',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
         {
           workspace_id: workspace.id,
@@ -103,6 +131,8 @@ module.exports = {
           payment_info: 'Р/С 54578 78777 888877 Санкт-Петербург, улица Пушкина, дом Колотушкина 47',
           contrAgentInn: '54576787878',
           contrAgentKpp: '5555554545787787',
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ], {});
     }

@@ -2,6 +2,7 @@ import Config from './';
 import Sequelize from 'sequelize';
 import FileModel from '../models/File';
 import UserModel from '../models/User';
+import ActionCodesModel from '../models/ActionCodes';
 import CategoryModel from '../models/Category';
 import ContragentModel from '../models/Contragent';
 import SessionHistoryModel from '../models/SessionHistory';
@@ -52,6 +53,7 @@ const db = {
   Sequelize,
   SessionHistory: SessionHistoryModel(sequelize),
   User: UserModel(sequelize),
+  ActionCodes: ActionCodesModel(sequelize),
   File: FileModel(sequelize),
   Profile: ProfileModel(sequelize),
   Settings: SettingsModel(sequelize),
