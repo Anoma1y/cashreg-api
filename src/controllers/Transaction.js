@@ -57,6 +57,14 @@ class Transaction {
     },
   ];
 
+  static TransactionIncludeSingle = [
+    {
+      model: DB.File,
+      as: 'files',
+      through: { attributes: [] }
+    }
+  ];
+
   getTransactionList = async (req, res) => {
     try {
       await checkValidationErrors(req);
@@ -161,7 +169,10 @@ class Transaction {
         attributes: {
           exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
         },
-        include: Transaction.TransactionInclude,
+        include: [
+          ...Transaction.TransactionInclude,
+          ...Transaction.TransactionIncludeSingle,
+        ],
         json: true,
       });
 
@@ -171,6 +182,7 @@ class Transaction {
 
       return res.status(STATUS_CODES.OK).json(transaction);
     } catch (err) {
+      console.log(err)
       return setResponseError(res, err);
     }
   };

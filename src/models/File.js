@@ -54,5 +54,22 @@ export default (sequelize) => {
     createdAt: 'created_at'
   };
 
-  return sequelize.define("files", attributes, options);
+  const File = sequelize.define("files", attributes, options);
+
+  File.associate = (models) => {
+    models.File.belongsToMany(models.Transaction, {
+      through: models.TransactionFiles,
+      foreignKey: 'file_id',
+      as: 'transactions',
+    });
+    // models.File.belongsToMany(models.Transaction, {
+    //   through: models.TransactionFiles,
+    //   foreignKey: 'transaction_id',
+    // });
+    // models.File.belongsToMany(models.TransactionFiles, {
+    //   through: models.TransactionFiles,
+    // });
+  };
+
+  return File;
 }

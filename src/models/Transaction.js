@@ -109,7 +109,11 @@ export default (sequelize) => {
 	const Transaction = sequelize.define("transactions", attributes, options);
 
 	Transaction.associate = (models) => {
-
+		models.Transaction.belongsToMany(models.File, {
+			through: models.TransactionFiles,
+			foreignKey: 'transaction_id',
+			as: 'files',
+		});
 	};
 
 	return Transaction;
