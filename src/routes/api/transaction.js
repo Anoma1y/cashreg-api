@@ -7,7 +7,8 @@ const router = require('express').Router();
 router.get('/', checkToken, Transaction.getTransactionList);
 router.get('/:transaction_id', checkToken, Transaction.getTransactionSingle);
 router.post('/:workspace_id', checkToken, Validation.createTransaction, Transaction.createTransaction);
-router.patch('/:workspace_id/:transaction_id', checkToken, Transaction.editTransaction);
+router.post('/:transaction_id/invalidate', checkToken, Transaction.invalidateTransaction);
+router.patch('/:transaction_id', checkToken, Transaction.editTransaction);
 router.delete('/:transaction_id', checkToken, Transaction.deleteTransaction);
 
 router.get('/summary', checkToken, Transaction.getSummary);

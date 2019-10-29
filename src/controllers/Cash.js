@@ -54,7 +54,7 @@ class Cash {
       if (isFilter) {
         cash = await CashService.getCash({ user_id, query: req.query });
       } else {
-        const cacheCash = null /*await redisGetAsync(`cash:${workspace_id}`);*/
+        const cacheCash = null; /*await redisGetAsync(`cash:${workspace_id}`);*/
 
         if (cacheCash) {
           cash = JSON.parse(cacheCash);

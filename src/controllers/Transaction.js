@@ -1,6 +1,9 @@
 import { Op } from 'sequelize';
 import DB from '../config/db';
 import {
+  redisDelAsync,
+} from '../config/redis';
+import {
   errorFormatter,
   HttpError,
   setResponseError,
@@ -127,24 +130,50 @@ class Transaction {
     try {
       await checkValidationErrors(req);
 
+      const {
+        params: {
+          workspace_id,
+        },
+        decoded: {
+          userId: user_id,
+        }
+      } = req;
+
       const transactionCreate = await TransactionService.createTransaction({
         data: req.body,
-        user_id: req.decoded.userId,
-        workspace_id: req.params.workspace_id,
+        user_id,
+        workspace_id,
       });
 
       const transaction = await TransactionService.getSingle(transactionCreate.id);
+
+      // await redisDelAsync(`cash:${workspace_id}`);
 
       return res.status(STATUS_CODES.CREATED).json(transaction);
     } catch (err) {
       return setResponseError(res, err)
     }
   };
+
   editTransaction = async (req, res) => {
 
   };
   deleteTransaction = async (req, res) => {
 
+  };
+
+  invalidateTransaction = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
+
+      const { transaction_id } = req.params;
+      const transaction = await TransactionService.invalidate(transaction_id);
+
+      return res.status(STATUS_CODES.OK).json(transaction);
+    } catch (err) {
+      console.log(err)
+      return setResponseError(res, err);
+    }
   };
 
   getSummary = async (req, res) => {

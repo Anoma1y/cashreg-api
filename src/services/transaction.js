@@ -79,7 +79,6 @@ class Transaction {
   };
 
   createTransaction = async (data) => {
-    console.log(data)
     const {
       data: {
         type,
@@ -113,7 +112,7 @@ class Transaction {
         );
 
         if (file_id.length !== 0) {
-          const transactionFilesCreate = await DB.TransactionFiles.bulkCreate(file_id.map(id => ({
+          await DB.TransactionFiles.bulkCreate(file_id.map(id => ({
               file_id: id,
               transaction_id: transactionCreate.id,
             })),
@@ -129,6 +128,17 @@ class Transaction {
           throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
         });
       }
+    });
+  }
+
+  invalidate = async (transaction_id) => {
+    const transaction = await DB.Transaction.findByPk(transaction_id);
+
+    return transaction.update({
+      invalidated_at: +new Date()
+    }, {
+      returning: true,
+      json: true,
     });
   }
 }
