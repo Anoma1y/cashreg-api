@@ -25,8 +25,14 @@ const sequelizeOptions = {
     idle: 10000
   },
 
-  underscored: true,
-  freezeTableName: true,
+  logging: true,
+
+  define: {
+    underscored: false,
+    freezeTableName: false,
+    timestamps: true,
+  }
+
 };
 
 export const sequelize = new Sequelize(

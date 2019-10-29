@@ -53,15 +53,15 @@ class Transaction {
     }
   ];
 
-  getSingle = async (transaction_id, options = {}) => {
+  getSingle = async (transaction_id, options = {}, expand = true) => {
     return DB.Transaction.findByPk(transaction_id, {
       attributes: {
         exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
       },
-      include: [
+      include: expand ? [
         ...Transaction.TransactionInclude,
         ...Transaction.TransactionIncludeSingle,
-      ],
+      ] : [],
       json: true,
       ...options,
     });
@@ -129,17 +129,56 @@ class Transaction {
         });
       }
     });
-  }
+  };
+
+  editTransaction = async (transaction_id, data) => {
+    try {
+      const transaction = await this.getSingle(transaction_id);
+
+      if (!transaction) {
+        throw {
+          action: ACTION_CODES.TRANSACTION_NOT_FOUND,
+          status: STATUS_CODES.NOT_FOUND,
+        };
+      }
+
+      if (transaction.invalidated_at !== null) {
+        throw {
+          action: ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED,
+          status: STATUS_CODES.FORBIDDEN,
+        }
+      }
+
+      Object.keys(data).forEach(key => {
+        transaction.set(key, data[key]);
+      });
+
+      return transaction.save();
+    } catch (e) {
+      throw new HttpError(e.action, e.status);
+    }
+  };
 
   invalidate = async (transaction_id) => {
     const transaction = await DB.Transaction.findByPk(transaction_id);
 
-    return transaction.update({
-      invalidated_at: +new Date()
-    }, {
-      returning: true,
-      json: true,
-    });
+    if (!transaction) {
+      throw {
+        action: ACTION_CODES.TRANSACTION_NOT_FOUND,
+        status: STATUS_CODES.NOT_FOUND,
+      };
+    }
+
+    if (transaction.invalidated_at !== null) {
+      throw {
+        action: ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED,
+        status: STATUS_CODES.CONFLICT,
+      };
+    }
+
+    transaction.invalidated_at = +new Date();
+
+    return transaction.save();
   }
 }
 

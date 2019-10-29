@@ -156,10 +156,34 @@ class Transaction {
   };
 
   editTransaction = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
 
-  };
-  deleteTransaction = async (req, res) => {
+      const {
+        params: {
+          transaction_id,
+        },
+        body: {
+          type, category_id, currency_id, contragent_id, file_id, registered_at, sum, comment
+        },
+      } = req;
 
+      const transaction = await TransactionService.editTransaction(transaction_id, removeEmpty({
+        type,
+        category_id,
+        currency_id,
+        contragent_id,
+        file_id,
+        registered_at,
+        sum,
+        comment,
+      }));
+
+      return res.status(STATUS_CODES.OK).json(transaction);
+    } catch (err) {
+      console.log(err)
+      return setResponseError(res, err);
+    }
   };
 
   invalidateTransaction = async (req, res) => {
@@ -167,11 +191,11 @@ class Transaction {
       await checkValidationErrors(req);
 
       const { transaction_id } = req.params;
+
       const transaction = await TransactionService.invalidate(transaction_id);
 
       return res.status(STATUS_CODES.OK).json(transaction);
     } catch (err) {
-      console.log(err)
       return setResponseError(res, err);
     }
   };

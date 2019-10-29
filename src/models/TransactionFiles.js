@@ -27,7 +27,7 @@ export const attributes = {
 	created_at: {
 		allowNull: false,
 		type: Sequelize.DATE,
-		defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+		defaultValue: Sequelize.NOW,
 		get() {
 			return dateToUnix(this.getDataValue('created_at'))
 		},
@@ -35,7 +35,7 @@ export const attributes = {
 	updated_at: {
 		allowNull: false,
 		type: Sequelize.DATE,
-		defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+		defaultValue: Sequelize.NOW,
 		get() {
 			return dateToUnix(this.getDataValue('updated_at'))
 		},
