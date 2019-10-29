@@ -35,12 +35,10 @@ export const uploadFile = (file, uploadPath) =>
     });
   });
 
-export const generateFileName = originalname => {
+export const generateFileName = (originalname, separate) => {
   const str = uuid();
-  const ext = getFileNameExt(originalname)
-  const cutExtName = originalname.slice(0, -(ext.length + 1));
 
-  return `${str.replace(/-/g, '').slice(0, 20)}-${cutExtName}`;
+  return `cashreg/uploads/transactions/${str.replace(/-/g, '').slice(0, 25)}${separate ? `-${separate}` : ''}-${originalname}`;
 };
 
 export const getFileNameExt = originalname => {

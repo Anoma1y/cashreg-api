@@ -13,3 +13,5 @@ export const checkTransactionType = type => {
 };
 
 export const aboveZero = val => val > 0;
+
+export const arrayOfNumbers = arr => arr.every(it => Number.isInteger(it));

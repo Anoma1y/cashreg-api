@@ -16,55 +16,6 @@ import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
 
 class Transaction {
-  static TransactionInclude = [
-    {
-      model: DB.Category,
-      attributes: {
-        exclude: ['workspace_id', 'created_at', 'updated_at', 'deleted_at'],
-      },
-    },
-    {
-      model: DB.Currency,
-      attributes: {
-        exclude: ['created_at', 'updated_at'],
-      },
-    },
-    {
-      model: DB.Contragent,
-      attributes: {
-        exclude: ['workspace_id', 'created_at', 'updated_at'],
-      },
-    },
-    {
-      model: DB.Workspace,
-      attributes: {
-        exclude: ['created_at', 'updated_at', 'deleted_at'],
-      },
-    },
-    {
-      model: DB.User,
-      attributes: {
-        exclude: ['password', 'created_at', 'updated_at'],
-      },
-      include: [
-        {
-          model: DB.Profile,
-          attributes: {
-            exclude: ['created_at', 'updated_at', 'id'],
-          },
-        },
-      ],
-    },
-  ];
-
-  static TransactionIncludeSingle = [
-    {
-      model: DB.File,
-      as: 'files',
-      through: { attributes: [] }
-    }
-  ];
-
   getTransactionList = async (req, res) => {
     try {
       await checkValidationErrors(req);
@@ -140,13 +91,8 @@ class Transaction {
       const data = await TransactionService.getList({
         offset,
         limit,
-        attributes: {
-          exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
-        },
         where,
         order,
-        include: Transaction.TransactionInclude,
-        json:true,
       });
 
       return res.status(STATUS_CODES.OK).json({
@@ -165,16 +111,7 @@ class Transaction {
       await checkValidationErrors(req);
 
       const { transaction_id } = req.params;
-      const transaction = await TransactionService.getSingle(transaction_id, {
-        attributes: {
-          exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
-        },
-        include: [
-          ...Transaction.TransactionInclude,
-          ...Transaction.TransactionIncludeSingle,
-        ],
-        json: true,
-      });
+      const transaction = await TransactionService.getSingle(transaction_id);
 
       if (!transaction) {
         return res.status(STATUS_CODES.NOT_FOUND).send()
@@ -182,7 +119,6 @@ class Transaction {
 
       return res.status(STATUS_CODES.OK).json(transaction);
     } catch (err) {
-      console.log(err)
       return setResponseError(res, err);
     }
   };
@@ -191,7 +127,13 @@ class Transaction {
     try {
       await checkValidationErrors(req);
 
-      const transaction = await TransactionService.createTransaction(req.body);
+      const transactionCreate = await TransactionService.createTransaction({
+        data: req.body,
+        user_id: req.decoded.userId,
+        workspace_id: req.params.workspace_id,
+      });
+
+      const transaction = await TransactionService.getSingle(transactionCreate.id);
 
       return res.status(STATUS_CODES.CREATED).json(transaction);
     } catch (err) {

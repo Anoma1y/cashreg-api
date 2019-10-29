@@ -3,6 +3,7 @@ import { check, param } from 'express-validator';
 import {
 	checkTransactionType,
 	aboveZero,
+	arrayOfNumbers,
 } from './utils';
 
 const createTransaction = [
@@ -17,6 +18,11 @@ const createTransaction = [
 		.exists()
 		.isNumeric()
 		.custom(aboveZero),
+	check('file_id', ACTION_CODES.EMPTY_FIELD_FILE_ID)
+		.optional()
+		.isArray()
+		.custom(arrayOfNumbers)
+		.withMessage('Array file_id should contain only numbers'),
 	check('category_id')
 		.exists()
 		.isNumeric(),

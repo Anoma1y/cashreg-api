@@ -1,69 +1,51 @@
 import DB from '../config/db';
-import Config from '../config';
 import { Op } from 'sequelize';
 import ACTION_CODES from "../helpers/actionCodes";
 import { HttpError, setResponseError } from "../helpers/errorHandler";
-import { generateFileName, getFileNameExt } from '../helpers';
 import STATUS_CODES from "../helpers/statusCodes";
-import AWS from 'aws-sdk';
-import multer from 'multer';
-import multerS3 from 'multer-s3';
-
-const endpoint = new AWS.Endpoint('https://fra1.digitaloceanspaces.com');
-
-const s3 = new AWS.S3({
-  endpoint,
-  accessKeyId: Config.DIGITAL_OCEAN_SPACES_ACCESS_KEY,
-  secretAccessKey: Config.DIGITAL_OCEAN_SPACES_SECRET_KEY,
-});
-
-const fileUploader = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: Config.DIGITAL_OCEAN_SPACES_BUCKET_NAME,
-    acl: "public-read",
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    key: function(req, file, cb) {
-      const { originalname } = file;
-
-      const fileExtension = getFileNameExt(originalname);
-      const fileName = generateFileName(originalname);
-      const fileFullName = `${fileName}.${fileExtension}`;
-      const filePath = `cashreg/uploads/transactions/${fileFullName}`;
-
-      cb(null, filePath);
-    },
-  }),
-  limits: { fileSize: 3000000 },
-}).single("file");
-
 
 class File {
-  uploadFile = (req, res) => {
+  uploadFile = async (req, res) => {
+    try {
+      const { file } = req;
 
-    fileUploader(req, res, async err => {
-      if (err) {
-        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-          action: ACTION_CODES.FILE_UPLOAD_ERROR
+      if (!file) {
+        return setResponseError(res, {
+          action: ACTION_CODES.FILE_UPLOAD_NOT_FOUND,
+          status: STATUS_CODES.UNPROCESSABLE_ENTITY,
+          extra: {}
         })
       }
 
-      try {
-        const { file } = req;
+      let fileData = {};
 
-        const createFile = await DB.File.create({
+      if (file.hasOwnProperty('transforms')) {
+        const original = file.transforms.find(f => f.id === 'original');
+        const preview = file.transforms.find(f => f.id === 'preview');
+
+        fileData = {
+          original_name: original.key.split('/').pop(),
+          extension: file.mimetype,
+          size: original.size,
+          original_uri: original.location,
+          preview_uri: preview.location,
+        };
+      } else {
+        fileData = {
           original_name: file.key.split('/').pop(),
-          extension: file.contentType,
+          extension: file.mimetype,
           size: file.size,
           original_uri: file.location,
-          preview_uri: file.location,
-        });
-
-        return res.status(STATUS_CODES.OK).json(createFile)
-      } catch (e) {
-        return setResponseError(res, err);
+          preview_uri: null,
+        };
       }
-    });
+
+      const createFile = await DB.File.create(fileData);
+
+      return res.status(STATUS_CODES.OK).json(createFile)
+    } catch (err) {
+      return setResponseError(res, err);
+    }
   };
 
   getFile = async (req, res) => {

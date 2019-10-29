@@ -1,31 +1,135 @@
-import DB from '../config/db';
+import DB, { sequelize } from '../config/db';
 import { HttpError } from '../helpers/errorHandler';
 import STATUS_CODES from '../helpers/statusCodes';
 import ACTION_CODES from '../helpers/actionCodes';
 
 class Transaction {
-  getSingle = async (data, options = {}) => {
-    if (typeof data === 'object') {
-      return DB.Transaction.findOne({
-        where: {
-          ...data,
-        }, ...options
-      });
-    }
+  static TransactionInclude = [
+    {
+      model: DB.Category,
+      attributes: {
+        exclude: ['workspace_id', 'created_at', 'updated_at', 'deleted_at'],
+      },
+    },
+    {
+      model: DB.Currency,
+      attributes: {
+        exclude: ['created_at', 'updated_at'],
+      },
+    },
+    {
+      model: DB.Contragent,
+      attributes: {
+        exclude: ['workspace_id', 'created_at', 'updated_at'],
+      },
+    },
+    {
+      model: DB.Workspace,
+      attributes: {
+        exclude: ['created_at', 'updated_at', 'deleted_at'],
+      },
+    },
+    {
+      model: DB.User,
+      attributes: {
+        exclude: ['password', 'created_at', 'updated_at'],
+      },
+      include: [
+        {
+          model: DB.Profile,
+          attributes: {
+            exclude: ['created_at', 'updated_at', 'id'],
+          },
+        },
+      ],
+    },
+  ];
 
-    return DB.Transaction.findByPk(data, options);
+  static TransactionIncludeSingle = [
+    {
+      model: DB.File,
+      as: 'files',
+      through: { attributes: [] }
+    }
+  ];
+
+  getSingle = async (transaction_id, options = {}) => {
+    return DB.Transaction.findByPk(transaction_id, {
+      attributes: {
+        exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
+      },
+      include: [
+        ...Transaction.TransactionInclude,
+        ...Transaction.TransactionIncludeSingle,
+      ],
+      json: true,
+      ...options,
+    });
   };
 
   getList = async (options = {}) => {
-    return DB.Transaction.findAll(options)
+    return DB.Transaction.findAll({
+      attributes: {
+        exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
+      },
+      include: Transaction.TransactionInclude,
+      json:true,
+      ...options,
+    })
   };
 
   createTransaction = async (data) => {
-    // try {
-    //
-    // } catch (e) {
-    //
-    // }
+    console.log(data)
+    const {
+      data: {
+        type,
+        category_id,
+        currency_id,
+        contragent_id,
+        file_id,
+        registered_at,
+        sum,
+        comment,
+      },
+      workspace_id,
+      user_id,
+    } = data;
+
+    return await sequelize.transaction().then(async (transaction) => {
+      try {
+        const transactionCreate = await DB.Transaction.create(
+          {
+            user_id,
+            workspace_id,
+            type,
+            category_id,
+            currency_id,
+            contragent_id,
+            registered_at,
+            sum,
+            comment,
+          },
+          {transaction}
+        );
+
+        if (file_id.length !== 0) {
+          const transactionFilesCreate = await DB.TransactionFiles.bulkCreate(file_id.map(id => ({
+              file_id: id,
+              transaction_id: transactionCreate.id,
+            })),
+            {transaction}
+          );
+        }
+
+        await transaction.commit();
+
+        return transactionCreate;
+      } catch (e) {
+        await transaction.rollback().then(() => {
+          throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
+        });
+      }
+    });
   }
 }
 
