@@ -38,19 +38,10 @@ export const attributes = {
       return dateToUnix(this.getDataValue('created_at'))
     }
   },
-  updated_at: {
-    allowNull: false,
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-    get() {
-      return dateToUnix(this.getDataValue('updated_at'))
-    }
-  },
 };
 
 export default (sequelize) => {
   const options = {
-    updatedAt: 'updated_at',
     createdAt: 'created_at'
   };
 
@@ -62,13 +53,6 @@ export default (sequelize) => {
       foreignKey: 'file_id',
       as: 'transactions',
     });
-    // models.File.belongsToMany(models.Transaction, {
-    //   through: models.TransactionFiles,
-    //   foreignKey: 'transaction_id',
-    // });
-    // models.File.belongsToMany(models.TransactionFiles, {
-    //   through: models.TransactionFiles,
-    // });
   };
 
   return File;

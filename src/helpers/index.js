@@ -36,9 +36,19 @@ export const uploadFile = (file, uploadPath) =>
   });
 
 export const generateFileName = (originalname, separate) => {
-  const str = uuid();
+  const hash = uuid().replace(/-/g, '').slice(0, 25);
+  const currentTime = new Date();
+  const month = (currentTime.getUTCMonth() + 1).toString();
+  const day = currentTime.getUTCDate().toString();
+  const year = currentTime.getUTCFullYear().toString().substr(-2);
+  const groupName = `${year}${month}${day}`;
+  const path = `cashreg/uploads/transactions/${groupName}`;
 
-  return `cashreg/uploads/transactions/${str.replace(/-/g, '').slice(0, 25)}${separate ? `-${separate}` : ''}-${originalname}`;
+  if (separate) {
+    return `${path}/${separate}/${hash}-${originalname}`
+  }
+
+  return `${path}/original/${hash}-${originalname}`;
 };
 
 export const getFileNameExt = originalname => {
