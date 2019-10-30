@@ -8,7 +8,7 @@ import Permissions from '../helpers/permissions';
 class Permission {
 	getList = async (req, res) => {
 		return res.status(STATUS_CODES.OK).json(Permissions.PermissionList);
-	}
+	};
 }
 
 export default new Permission();

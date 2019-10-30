@@ -17,7 +17,6 @@ import CurrencyModel from '../models/Currency';
 const sequelizeOptions = {
   host: Config.db_host,
   dialect: 'postgres',
-  operatorsAliases: false,
 
   pool: {
     max: 5,
@@ -26,7 +25,7 @@ const sequelizeOptions = {
     idle: 10000
   },
 
-  logging: true,
+  logging: console.log,
 
   define: {
     underscored: false,

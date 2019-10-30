@@ -9,6 +9,7 @@ import CurrencyRouter from './currency';
 import TransactionRouter from './transaction';
 import CashRouter from './cash';
 import PermissionRoute from './permission';
+import WorkspaceRoute from './workspace';
 
 router.use('/session', SessionRouter);
 router.use('/file', FileRouter);
@@ -20,5 +21,6 @@ router.use('/currency', CurrencyRouter);
 router.use('/transaction', TransactionRouter);
 router.use('/cash', CashRouter);
 router.use('/permission', PermissionRoute);
+router.use('/workspace', WorkspaceRoute);
 
 export default router;

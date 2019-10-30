@@ -13,8 +13,18 @@ export const attributes = {
 		allowNull: false,
 		type: Sequelize.STRING(100),
 	},
+	base_currency_id: {
+		type: Sequelize.INTEGER,
+		allowNull: true,
+		onDelete: "CASCADE",
+		references: {
+			model: "currencies",
+			key: "id"
+		}
+	},
 	is_personal: {
 		allowNull: false,
+		defaultValue: false,
 		type: Sequelize.BOOLEAN,
 	},
 	created_at: {
@@ -33,12 +43,12 @@ export const attributes = {
 			return dateToUnix(this.getDataValue('updated_at'))
 		}
 	},
-	deleted_at: {
+	archived_at: {
 		allowNull: true,
 		type: Sequelize.DATE,
 		defaultValue: null,
 		get() {
-			return dateToUnix(this.getDataValue('deleted_at'))
+			return dateToUnix(this.getDataValue('archived_at'))
 		}
 	}
 };
@@ -47,7 +57,7 @@ export default (sequelize) => {
 	const options = {
 		updatedAt: 'updated_at',
 		createdAt: 'created_at',
-		deletedAt: 'deleted_at',
+		archivedAt: 'archived_at',
 	};
 
 	const Workspace = sequelize.define("workspaces", attributes, options);

@@ -17,6 +17,10 @@ export const attributes = {
       key: "id"
     }
   },
+  extra_data: {
+    allowNull: true,
+    type: Sequelize.TEXT,
+  },
   type: {
     allowNull: false,
     type: Sequelize.INTEGER
