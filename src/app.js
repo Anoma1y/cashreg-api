@@ -3,7 +3,6 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import routes from './routes';
-
 const app = express();
 
 app.use(cors({ origin: true }));
