@@ -8,6 +8,7 @@ import ContragentRouter from './contragent';
 import CurrencyRouter from './currency';
 import TransactionRouter from './transaction';
 import CashRouter from './cash';
+import PermissionRoute from './permission';
 
 router.use('/session', SessionRouter);
 router.use('/file', FileRouter);
@@ -18,5 +19,6 @@ router.use('/contragent', ContragentRouter);
 router.use('/currency', CurrencyRouter);
 router.use('/transaction', TransactionRouter);
 router.use('/cash', CashRouter);
+router.use('/permission', PermissionRoute);
 
 export default router;
