@@ -32,7 +32,7 @@ class Workspace {
       await WorkspaceService.inviteUser(req.body);
 
       return res.status(STATUS_CODES.OK).json({
-        action: ACTION_CODES.USER_CREATED
+        action: ACTION_CODES.USER_INVITED,
       });
     } catch (err) {
       return setResponseError(res, err)

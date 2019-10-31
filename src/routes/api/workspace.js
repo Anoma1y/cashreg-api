@@ -1,6 +1,7 @@
 import Workspace from '../../controllers/Workspace';
 import { checkToken } from '../../middlewares/jwt';
 import Permissions from '../../middlewares/permissions';
+import Validation from './validation/workspace';
 
 const router = require('express').Router();
 
@@ -9,12 +10,13 @@ router.get('/:workspace_id', checkToken, Workspace.getSingleWorkspace);
 router.post('/:workspace/archived', checkToken, Workspace.archivedWorkspace);
 router.patch('/:workspace', checkToken, Workspace.editWorkspace);
 
-router.post('/invite',
+router.post('/:workspace_id/invite',
 	checkToken,
 	Permissions.can(Permissions.PermissionList.workspace_invite_users),
+	Validation.userInvite,
 	Workspace.inviteUser
 );
-router.post('/invite/confirm', checkToken, Workspace.userInviteConfirmation);
+router.post('/:workspace_id/invite/confirm', checkToken, Workspace.userInviteConfirmation);
 router.delete('/:workspace_id/kick/:user_id',
 	checkToken,
 	Permissions.can(Permissions.PermissionList.workspace_kick_users),
