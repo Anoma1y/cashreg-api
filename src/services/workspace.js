@@ -5,11 +5,9 @@ import ACTION_CODES from '../helpers/actionCodes';
 import MailService from './mail';
 
 class Workspace {
-	getUserWorkspaceByUserId = async (user_id) => {
+	getUserWorkspace = async (where = {}) => {
 		return DB.WorkspaceUsers.findOne({
-			where: {
-				user_id,
-			},
+			where,
 			plain: true,
 		})
 	};
