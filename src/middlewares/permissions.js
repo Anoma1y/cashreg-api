@@ -34,7 +34,7 @@ class Permissions extends BitwisePermissions {
       const userWorkspaceCache = await Permissions.getCache(workspace_id, userId);
 
       if (Permissions.check(Number(userWorkspaceCache), permission)) return next();
-      else return Permissions.error(res);
+      else if (userWorkspaceCache !== null) return Permissions.error(res);
     } catch (e) {
       console.error(e)
     }

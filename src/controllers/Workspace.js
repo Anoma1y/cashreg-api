@@ -29,14 +29,6 @@ class Workspace {
     try {
       await checkValidationErrors(req);
 
-      const {
-        decoded: {
-          userId: user_id
-        },
-      } = req;
-
-      await PermissionService.checkPermission(user_id);
-
       await WorkspaceService.inviteUser(req.body);
 
       return res.status(STATUS_CODES.OK).json({
