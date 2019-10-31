@@ -9,23 +9,22 @@ import BitwisePermissions from '../helpers/permissions';
 import WorkspaceService from '../services/workspace';
 
 class Permissions extends BitwisePermissions {
-  static error = res => res.status(STATUS_CODES.FORBIDDEN).send();
+  static error = res =>
+    res.status(STATUS_CODES.FORBIDDEN).send();
 
-  static workspaceIdMissing = res => res.status (STATUS_CODES.NOT_FOUND).json({ action: ACTION_CODES.EMPTY_PARAMS_WORKSPACE_ID })
+  static workspaceIdMissing = res =>
+    res.status (STATUS_CODES.NOT_FOUND).json({ action: ACTION_CODES.EMPTY_PARAMS_WORKSPACE_ID });
 
-  static getCache = async (wsid, uid) => {
-    return redisHgetAsync(`workspace-permissions:${wsid}`, uid.toString())
-  };
+  static getCache = async (workspace_id, user_id) =>
+    redisHgetAsync(`workspace-permissions:${workspace_id}`, user_id.toString());
 
-  static setCache = async (wsid, uid, permNumber) => {
-    return redisHSetObjectAsync(`workspace-permissions:${wsid}`, {
-      [uid]: permNumber,
+  static setCache = async (workspace_id, user_id, permNumber) =>
+    redisHSetObjectAsync(`workspace-permissions:${workspace_id}`, {
+      [user_id]: permNumber,
     });
-  };
 
-  static clearAllCacheByWorkspaceId = async (wsid) => {
-    return redisDelAsync(`workspace:${wsid}`);
-  };
+  static clearAllCacheByWorkspaceId = async (wsid) =>
+    redisDelAsync(`workspace:${wsid}`);
 
   static can = (permission) => async (req, res, next) => {
     const { userId } = req.decoded;

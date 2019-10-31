@@ -71,18 +71,18 @@ class Workspace {
 				},
 			);
 
-			// const activationLink = `https://example.test/auth/signup/confirm?user_id=${invitedUser.id}&code_id=${actionCode.id}&code=${activationCode}`; // todo add host for confirm email
-			//
-			// MailService.sendMail({
-			// 	to: invitedUser.email,
-			// 	subject: 'Приглашение в доску',
-			// 	html: `
-      //       <a href="${activationLink}">Приглашение в доску ID: ${workspace_id}</a>
-      //       <p>Code: ${activationCode}</p>
-      //       <p>Code ID: ${actionCode.id}</p>
-      //       <p>User ID: ${invitedUser.id}</p>
-      //     `
-			// });
+			const activationLink = `https://example.test/auth/signup/confirm?user_id=${invitedUser.id}&code_id=${actionCode.id}&code=${activationCode}`; // todo add host for confirm email
+
+			MailService.sendMail({
+				to: invitedUser.email,
+				subject: 'Приглашение в доску',
+				html: `
+            <a href="${activationLink}">Приглашение в доску ID: ${workspace_id}</a>
+            <p>Code: ${activationCode}</p>
+            <p>Code ID: ${actionCode.id}</p>
+            <p>User ID: ${invitedUser.id}</p>
+          `
+			});
 		} catch (e) {
 			throw new HttpError(e.action, e.status);
 		}
