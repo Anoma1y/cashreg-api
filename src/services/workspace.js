@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import DB from '../config/db';
 import {
 	addTimestamp,
@@ -87,6 +88,51 @@ class Workspace {
 			throw new HttpError(e.action, e.status);
 		}
 	}
+
+	confirmInvite = async (data) => {
+		const {
+			user_id,
+			code,
+			code_id,
+		} = data;
+
+		const actionCode = await DB.ActionCodes.findOne({
+			where: {
+				id: code_id,
+				type: ACTION_CODES_TYPES.WORKSPACE_INVITE,
+				user_id,
+				code,
+				claimed_at: null,
+				expires_at: {
+					[Op.gt]: new Date()
+				}
+			}
+		}).catch(() => {
+			throw new HttpError(ACTION_CODES.VERIFY_TOKEN_EXPIRED, STATUS_CODES.UNPROCESSABLE_ENTITY);
+		});
+
+		const user = await DB.User.findByPk(user_id);
+
+		if (!user) {
+			throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+		}
+
+		// const transaction = await sequelize.transaction();
+		//
+		// try {
+		// 	profile.is_email_verified = true;
+		// 	await profile.save({ transaction });
+		//
+		// 	actionCode.claimed_at = +new Date();
+		// 	await actionCode.save({ transaction });
+		//
+		// 	await transaction.commit();
+		// } catch (e) {
+		// 	await transaction.rollback().then(() => {
+		// 		throw new HttpError('Err', STATUS_CODES.INTERNAL_SERVER_ERROR);
+		// 	});
+		// }
+	};
 }
 
 export default new Workspace();

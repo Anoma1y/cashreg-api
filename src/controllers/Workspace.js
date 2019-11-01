@@ -40,7 +40,17 @@ class Workspace {
   };
 
   userInviteConfirmation = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
 
+      await WorkspaceService.confirmInvite(req.body);
+
+      return res.status(STATUS_CODES.OK).json({
+        action: ACTION_CODES.USER_INVITED,
+      });
+    } catch (err) {
+      return setResponseError(res, err)
+    }
   };
 
   archivedWorkspace = async (req, res) => {
