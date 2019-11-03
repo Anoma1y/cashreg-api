@@ -36,8 +36,8 @@ export const generateJWT = (data, key) => new Promise((res, rej) => {
         });
 
         res({
-            token,
-            refreshToken,
+            access_token: token,
+            refresh_token: refreshToken,
             created_at,
             expires_at,
         });

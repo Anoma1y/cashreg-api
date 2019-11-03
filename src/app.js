@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
 import routes from './routes';
 const app = express();
 
-app.use(cors({ origin: true }));
+app.use(cors());
 
 const limiter = new rateLimit({
   windowMs: 10 * 60 * 1000,

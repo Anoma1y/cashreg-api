@@ -12,11 +12,11 @@ class User {
     try {
       await checkValidationErrors(req);
 
-      const { email } = req.body;
+      const { email } = req.query;
 
       const isExist = await RegistrationService.checkExist(email);
 
-      return res.status(!isExist ? STATUS_CODES.OK : STATUS_CODES.NOT_FOUND).send()
+      return res.status(isExist ? STATUS_CODES.CONFLICT : STATUS_CODES.OK).send()
     } catch (err) {
       return setResponseError(res, err)
     }

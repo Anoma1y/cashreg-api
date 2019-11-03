@@ -19,17 +19,16 @@ import ACTION_CODES from "../helpers/actionCodes";
 import jwt from 'jsonwebtoken';
 import { raffinierenToken } from '../helpers/jwt';
 
+const BANNED_TIME = 2 * 60 * 1000;
+const ATTEMPTS_TO_BAN = 5;
+
 class AuthService {
   genAuthToken = async (userId, key = null) => {
     const tokenPayload = {
       userId
     };
-    
-    const authToken = await generateJWT(tokenPayload, key);
 
-    return {
-      authToken,
-    };
+    return generateJWT(tokenPayload, key)
   };
 
   login = async (email, password, remoteAddress) => {
@@ -43,15 +42,15 @@ class AuthService {
       throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
     }
 
-    const loginAttemptKey = `login-attempt:${user.id}`;
+    const loginAttemptKey = `login-attempts:${user.id}`;
 
     const loginBlock = await redisHgetAllAsync(loginAttemptKey);
 
     if (loginBlock) {
-      const { attempt, time: expiresAt } = loginBlock;
+      const { attempts, time: expiresAt } = loginBlock;
 
       const now = new Date().getTime();
-      const untilTime = new Date(Math.round(new Date(Number(expiresAt)).getTime()) + (5 * 60 * 1000)).getTime();
+      const untilTime = new Date(Math.round(new Date(Number(expiresAt)).getTime()) + (BANNED_TIME)).getTime();
 
       if (now > untilTime) {
         await redisDelAsync(loginAttemptKey)
@@ -63,7 +62,7 @@ class AuthService {
 
         const totalSeconds = (minutes * 60) + seconds;
 
-        if (attempt >= 3) {
+        if (attempts >= ATTEMPTS_TO_BAN) {
           throw new HttpError(ACTION_CODES.USER_BANNED, STATUS_CODES.FORBIDDEN, { ban_period: totalSeconds });
         }
       }
@@ -79,16 +78,16 @@ class AuthService {
         user_ip: remoteAddress
       });
 
-      return await this.genAuthToken(user.id);
+      return this.genAuthToken(user.id);
     } else {
       if (!loginBlock) {
-        await redisHsetAsync(loginAttemptKey, 'attempt', 1, 'time', currentTime);
+        await redisHsetAsync(loginAttemptKey, 'attempts', 1, 'time', currentTime);
       } else {
         await redisHsetAsync(loginAttemptKey, 'time', currentTime);
-        await redisHincrbyAsync(loginAttemptKey, 'attempt', 1)
+        await redisHincrbyAsync(loginAttemptKey, 'attempts', 1)
       }
 
-      throw new HttpError(ACTION_CODES.INVALID_LOGIN_OR_PASS, STATUS_CODES.FORBIDDEN);
+      throw new HttpError(ACTION_CODES.INVALID_LOGIN_OR_PASS, STATUS_CODES.UNAUTHORIZED);
     }
   };
 
