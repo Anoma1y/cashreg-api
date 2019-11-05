@@ -38,6 +38,10 @@ class User {
     }
   };
 
+	resendMail = async (req, res) => {
+
+	};
+
   userVerify = async (req, res) => {
     try {
       await checkValidationErrors(req);

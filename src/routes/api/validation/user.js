@@ -2,11 +2,6 @@ import ACTION_CODES from "../../../helpers/actionCodes";
 import { check } from 'express-validator';
 
 const createUser = [
-  check('login', ACTION_CODES.EMPTY_FIELD_LOGIN)
-    .exists()
-    .trim()
-    .isLength({ min: 3, max: 36 })
-    .withMessage('Login invalid'),
   check('email', ACTION_CODES.EMPTY_FIELD_EMAIL)
     .exists()
     .trim()

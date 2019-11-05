@@ -1,3 +1,4 @@
+import Sequelize from 'sequelize';
 import DB from "../config/db";
 import { 
   redisDelAsync, 
@@ -31,15 +32,26 @@ class AuthService {
     return generateJWT(tokenPayload, key)
   };
 
-  login = async (email, password, remoteAddress) => {
-    const user = await DB.User.findOne({
+  checkUserAndVerify = async email => {
+    return DB.User.findOne({
       where: {
-        email
-      }
-    });
+        email,
+      },
+      plain: true,
+      include: [{
+        model: DB.Profile,
+        attributes: ['is_email_verified'],
+      }]
+    })
+  };
+
+  login = async (email, password, remoteAddress) => {
+    const user = await this.checkUserAndVerify(email);
 
     if (!user) {
       throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+    } else if (!user.profile.is_email_verified) {
+      throw new HttpError(ACTION_CODES.ACTIVATION_REQUIRED, STATUS_CODES.IM_A_TEAPOT);
     }
 
     const loginAttemptKey = `login-attempts:${user.id}`;

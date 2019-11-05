@@ -3,6 +3,7 @@ import DB, { sequelize } from '../config/db';
 import {
   addTimestamp,
   generateCode,
+  generateKey,
   hashPassword,
 } from '../helpers/index';
 import STATUS_CODES from '../helpers/statusCodes';
@@ -12,17 +13,18 @@ import MailService from './mail';
 import { ACTION_CODES_TYPES, ACTION_CODES_EXPIRES } from '../config/constants'
 
 class RegistrationService {
+
   checkExist = async (email) => {
     const user = await DB.User.findOne({ where: { email } });
-    
+
     return Boolean(user);
   };
   
   createUser = async (data) => {
     const { email, login, password } = data;
-    const user = await DB.User.findOne({ where: { email } });
+    const checkUser = await this.checkExist(email);
 
-    if (user) {
+    if (checkUser) {
       throw new HttpError(ACTION_CODES.USER_ALREADY_EXISTS, STATUS_CODES.CONFLICT);
     }
 
@@ -54,11 +56,13 @@ class RegistrationService {
         );
 
         const activationCode = generateCode();
+        const activationKey = generateKey();
 
         const actionCode = await DB.ActionCodes.create(
           {
             user_id: userCreate.id,
             code: activationCode,
+            extra_data: JSON.stringify({ activationKey }),
             type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
             expires_at: addTimestamp(ACTION_CODES_EXPIRES.EMAIL_VERIFICATION, true)
           },
@@ -75,6 +79,7 @@ class RegistrationService {
             <p>Code: ${activationCode}</p>
             <p>Code ID: ${actionCode.id}</p>
             <p>User ID: ${userCreate.id}</p>
+            <p>Actionvation key: ${activationKey}</p>
           `
         });
 

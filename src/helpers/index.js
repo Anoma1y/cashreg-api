@@ -7,6 +7,8 @@ export const generateCode = () => {
   return str.replace(/-/g, '');
 };
 
+export const generateKey = () => Math.floor(100000 + Math.random() * 900000);
+
 export const hashPassword = (password) =>
   new Promise((resolve, reject) => {
     bcrypt.genSalt(10, (saltErr, salt) => {
