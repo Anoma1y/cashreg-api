@@ -5,6 +5,7 @@ import {
   generateCode,
   generateKey,
   hashPassword,
+  removeEmpty,
 } from '../helpers/index';
 import STATUS_CODES from '../helpers/statusCodes';
 import { HttpError } from "../helpers/errorHandler";
@@ -85,7 +86,7 @@ class RegistrationService {
 
         await transaction.commit();
 
-        return userCreate.get('id');
+        return [userCreate, actionCode];
       } catch (e) {
         await transaction.rollback().then(() => {
           throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
@@ -94,21 +95,37 @@ class RegistrationService {
     });
   };
 
-  verify = async (userId, token, token_id) => {
+  verify = async (userId, data) => {
+    const { token, token_id, key } = data;
+
     const actionCode = await DB.ActionCodes.findOne({
       where: {
         id: token_id,
-        type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
         user_id: userId,
-        code: token,
+        type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
         claimed_at: null,
         expires_at: {
           [Op.gt]: new Date()
         }
       }
-    }).catch(() => {
-      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_EXPIRED, STATUS_CODES.UNPROCESSABLE_ENTITY);
     });
+
+    if (!actionCode) {
+      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+    }
+
+    if (!token && key) {
+      const { activationKey } = JSON.parse(actionCode.extra_data);
+
+
+      if (parseInt(activationKey) !== parseInt(key)) {
+        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.UNPROCESSABLE_ENTITY);
+      }
+    } else if (token && !key) {
+      if (token !== actionCode.code) {
+        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.UNPROCESSABLE_ENTITY);
+      }
+    }
 
     const profile = await DB.Profile.findOne({ where: { user_id: userId } });
 
@@ -118,10 +135,6 @@ class RegistrationService {
 
     if (profile.is_email_verified) {
       throw new HttpError(ACTION_CODES.USER_EMAIL_ALREADY_VERIFIED, STATUS_CODES.CONFLICT);
-    }
-
-    if (!actionCode) {
-      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.NOT_FOUND);
     }
 
     const transaction = await sequelize.transaction();

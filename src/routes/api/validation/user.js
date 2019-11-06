@@ -12,19 +12,24 @@ const createUser = [
     .exists()
     .trim()
     .isLength({ min: 6, max: 36 })
-    .withMessage(ACTION_CODES.PASSWORD_VALUE_INVALID)
 ];
 
 const verifyUser = [
   check('token', ACTION_CODES.EMPTY_FIELD_TOKEN)
     .exists()
-    .trim()
-    .withMessage('Token not found'),
+    .trim(),
   check('token_id', ACTION_CODES.EMPTY_FIELD_TOKEN_ID)
     .exists()
     .trim()
     .isInt()
-    .withMessage('Token ID not found')
+];
+
+const verifyUserViaKey = [
+  check('key', ACTION_CODES.EMPTY_FIELD_KEY)
+    .exists()
+    .isNumeric()
+    .isLength({ min: 6, max: 6 })
+    .withMessage(ACTION_CODES.VERIFY_KEY_LENGTH)
 ];
 
 const changePassword = [
@@ -69,6 +74,7 @@ const resetPasswordStepTwo = [
 export default {
   createUser,
   verifyUser,
+  verifyUserViaKey,
   changePassword,
   checkEmail,
   resetPasswordStepTwo,

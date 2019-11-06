@@ -28,10 +28,11 @@ class User {
       
       const { login, email, password } = req.body;
       
-      await RegistrationService.createUser({ email, login, password });
+      const [userCreate, actionCodeCreate] = await RegistrationService.createUser({ email, login, password });
       
       return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.USER_CREATED
+        action: ACTION_CODES.USER_CREATED,
+        token_id: actionCodeCreate.id
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -47,9 +48,9 @@ class User {
       await checkValidationErrors(req);
 
       const { user_id } = req.params;
-      const { token, token_id } = req.body;
+      const { token, token_id, key } = req.body;
 
-      await RegistrationService.verify(user_id, token, Number(token_id));
+      await RegistrationService.verify(user_id, { token, token_id, key });
 
       return res.status(STATUS_CODES.OK).json({
         action: ACTION_CODES.VERIFY_SUCCESS

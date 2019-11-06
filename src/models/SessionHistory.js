@@ -5,6 +5,7 @@ export default (sequelize) => {
   const attributes = {
     user_id: Sequelize.INTEGER,
     user_ip: Sequelize.STRING(50),
+    user_agent: Sequelize.STRING(150),
     created_at: {
       type: Sequelize.DATE,
       get() {
@@ -25,7 +26,7 @@ export default (sequelize) => {
     freezeTableName: true,
   };
 
-  const SessionHistory = sequelize.define("session-history", attributes, options);
+  const SessionHistory = sequelize.define("session_history", attributes, options);
 
   SessionHistory.associate = (models) => {
     models.SessionHistory.belongsTo(models.User, {

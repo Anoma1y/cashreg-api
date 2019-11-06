@@ -7,6 +7,7 @@ const router = require('express').Router();
 router.post('/create', Validation.createUser, User.createUser);
 router.post('/:user_id/resend_mail', Validation.createUser, User.resendMail);
 router.post('/:user_id/verify', Validation.verifyUser, User.userVerify);
+router.post('/:user_id/verify/key', Validation.verifyUserViaKey, User.userVerify);
 
 router.patch('/password', checkToken, Validation.changePassword, User.changePassword);
 router.delete('/password/reset', User.resetPasswordStepOne);
