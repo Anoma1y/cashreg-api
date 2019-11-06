@@ -6,6 +6,7 @@ import {
 import ACTION_CODES from '../helpers/actionCodes';
 import RegistrationService from '../services/registration';
 import PasswordService from '../services/password';
+import MailService from '../services/mail';
 
 class User {
   checkEmailExist = async (req, res) => {
@@ -29,9 +30,18 @@ class User {
       const { login, email, password } = req.body;
       
       const [userCreate, actionCodeCreate] = await RegistrationService.createUser({ email, login, password });
-      
+
+      MailService.sendRegistrationMail({
+        email: userCreate.email,
+        user_id: userCreate.id,
+        token_id: actionCodeCreate.id,
+        token: actionCodeCreate.code,
+        key: JSON.parse(actionCodeCreate.extra_data).activationKey
+      });
+
       return res.status(STATUS_CODES.CREATED).json({
         action: ACTION_CODES.USER_CREATED,
+        id: userCreate.id,
         token_id: actionCodeCreate.id
       });
     } catch (err) {
@@ -40,7 +50,28 @@ class User {
   };
 
 	resendMail = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
 
+      const { user_id } = req.params;
+      const { token_id } = req.body;
+
+      const [user, actionCodeCreate] = await RegistrationService.resendEmailVerify(user_id, token_id);
+
+      MailService.sendRegistrationMail({
+        email: user.email,
+        user_id: user.id,
+        token_id: actionCodeCreate.id,
+        token: actionCodeCreate.code,
+        key: JSON.parse(actionCodeCreate.extra_data).activationKey
+      });
+
+      return res.status(STATUS_CODES.OK).json({
+        action: ACTION_CODES.EMAIL_SEND
+      });
+    } catch (err) {
+      return setResponseError(res, err)
+    }
 	};
 
   userVerify = async (req, res) => {

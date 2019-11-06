@@ -24,6 +24,13 @@ const verifyUser = [
     .isInt()
 ];
 
+const resendEmail = [
+  check('token_id', ACTION_CODES.EMPTY_FIELD_TOKEN_ID)
+    .exists()
+    .trim()
+    .isInt()
+];
+
 const verifyUserViaKey = [
   check('key', ACTION_CODES.EMPTY_FIELD_KEY)
     .exists()
@@ -75,6 +82,7 @@ export default {
   createUser,
   verifyUser,
   verifyUserViaKey,
+  resendEmail,
   changePassword,
   checkEmail,
   resetPasswordStepTwo,

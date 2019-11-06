@@ -70,21 +70,7 @@ class RegistrationService {
           {transaction}
         );
 
-        const activationLink = `https://example.test/auth/signup/confirm?user_id=${userCreate.id}&code_id=${actionCode.id}&code=${activationCode}`; // todo add host for confirm email
-
-        MailService.sendMail({
-          to: email,
-          subject: 'Подтверждение регистрации',
-          html: `
-            <a href="${activationLink}">Активация аккаунта</a>
-            <p>Code: ${activationCode}</p>
-            <p>Code ID: ${actionCode.id}</p>
-            <p>User ID: ${userCreate.id}</p>
-            <p>Actionvation key: ${activationKey}</p>
-          `
-        });
-
-        await transaction.commit();
+        await transaction.commit(); // todo add send registration email after success commit
 
         return [userCreate, actionCode];
       } catch (e) {
@@ -119,11 +105,11 @@ class RegistrationService {
 
 
       if (parseInt(activationKey) !== parseInt(key)) {
-        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.UNPROCESSABLE_ENTITY);
+        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.FORBIDDEN);
       }
     } else if (token && !key) {
       if (token !== actionCode.code) {
-        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.UNPROCESSABLE_ENTITY);
+        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.FORBIDDEN);
       }
     }
 
@@ -154,7 +140,59 @@ class RegistrationService {
     }
 
     return true;
+  };
+
+  resendEmailVerify = async (user_id, token_id) => {
+    const actionCodeOld = await DB.ActionCodes.findOne({
+      where: {
+        id: token_id,
+        user_id,
+        type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
+        claimed_at: null,
+        expires_at: {
+          [Op.gt]: new Date()
+        }
+      }
+    });
+
+    if (!actionCodeOld) {
+      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+    }
+
+    const user = await DB.User.findByPk(user_id, {
+      attributes: ['id', 'email'],
+      plain: true,
+    }); // todo add condition
+
+    return await sequelize.transaction().then(async (transaction) => {
+      try {
+        const activationCode = generateCode();
+        const activationKey = generateKey();
+
+        const actionCode = await DB.ActionCodes.create(
+          {
+            user_id,
+            code: activationCode,
+            extra_data: JSON.stringify({ activationKey }),
+            type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
+            expires_at: addTimestamp(ACTION_CODES_EXPIRES.EMAIL_VERIFICATION, true)
+          },
+          {transaction}
+        );
+
+        actionCodeOld.claimed_at = +new Date();
+        await actionCodeOld.save({ transaction });
+
+        await transaction.commit();
+
+        return [user, actionCode];
+      } catch (e) {
+        await transaction.rollback().then(() => {
+          throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
+        });
+      }
+    });
   }
-};
+}
 
 export default new RegistrationService();
