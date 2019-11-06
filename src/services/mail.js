@@ -14,8 +14,9 @@ class Mail {
   }
   
   sendMail = message => {
-    if (Config.debug) {
-      console.log(message)
+    if (!Config.email_send) {
+      console.log(message);
+      return;
     }
 
     return this.transporter.sendMail({

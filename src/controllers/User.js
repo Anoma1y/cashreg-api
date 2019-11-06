@@ -67,7 +67,9 @@ class User {
       });
 
       return res.status(STATUS_CODES.OK).json({
-        action: ACTION_CODES.EMAIL_SEND
+        action: ACTION_CODES.EMAIL_SEND,
+        id: user.id,
+        token_id: actionCodeCreate.id
       });
     } catch (err) {
       return setResponseError(res, err)
