@@ -15,7 +15,7 @@ class Currency {
   getCurrencyList = async (req, res) => {
     try {
       await checkValidationErrors(req);
-
+      // throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.CONFLICT)
       const data = await CurrencyService.getList({
         attributes: {
           exclude: [

@@ -18,7 +18,21 @@ class Workspace {
   };
 
   getWorkspaceList = async (req, res) => {
+    try {
+      await checkValidationErrors(req);
 
+      const {
+        decoded: {
+          userId: user_id,
+        }
+      } = req;
+
+      const workspaces = await WorkspaceService.getWorkspaceList(user_id, { json: true });
+
+      return res.status(STATUS_CODES.OK).json(workspaces);
+    } catch (err) {
+      return setResponseError(res, err)
+    }
   };
 
   editWorkspace = async (req, res) => {

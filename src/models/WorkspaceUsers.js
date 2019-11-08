@@ -55,6 +55,7 @@ export default (sequelize) => {
 	const Workspace = sequelize.define("workspace_users", attributes, options);
 
 	Workspace.associate = (models) => {
+
 		models.Workspace.hasOne(models.Category, {
 			onDelete: 'CASCADE',
 			foreignKey: 'workspace_id'

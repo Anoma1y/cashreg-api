@@ -12,6 +12,21 @@ import MailService from './mail';
 import { ACTION_CODES_EXPIRES, ACTION_CODES_TYPES } from '../config/constants';
 
 class Workspace {
+	getWorkspaceList = async (user_id, opt = {}) => {
+		return DB.Workspace.findAll({
+			order: [['is_personal', 'desc']],
+			include: [{
+				model: DB.WorkspaceUsers,
+				attributes: ['permissions', 'created_at'],
+				as: 'info',
+				where: {
+					user_id
+				}
+			}],
+			...opt
+		})
+	};
+
 	getUserWorkspace = async (where = {}) => {
 		return DB.WorkspaceUsers.findOne({
 			where,
