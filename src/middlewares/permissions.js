@@ -26,53 +26,16 @@ class Permissions extends BitwisePermissions {
   static clearAllCacheByWorkspaceId = async (wsid) =>
     redisDelAsync(`workspace:${wsid}`);
 
-  // static isIn = () => async (req, res, next) => {
-  //   const { userId } = req.decoded;
-  //   const { workspace_id } = req.query;
-  //
-  //   if (!workspace_id || !userId)  return Permissions.error(res);
-  //
-  //   try {
-  //     const userWorkspaceCache = await Permissions.getCache(workspace_id, userId);
-  //
-  //     if (userWorkspaceCache !== null) {
-  //       return next();
-  //     }
-  //   } catch (e) {
-  //     console.error(e)
-  //   }
-  //
-  //   const userWorkspace = await Permissions.getUserWorkspace(userId, workspace_id);
-  //
-  //   if (userWorkspace) {
-  //     try {
-  //       await Permissions.setCache(workspace_id, userId, userWorkspace.permissions);
-  //     } catch (e) {
-  //       console.error(e)
-  //     }
-  //
-  //     return next();
-  //   }
-  //
-  //   return Permissions.error(res)
-  // };
-
   static can = (permission) => async (req, res, next) => {
-    const { userId } = req.decoded;
-    let workspace_id;
-
-    if (permission) {
-      workspace_id = req.params.workspace_id;
-    } else {
-      workspace_id = req.query.workspace_id;
-    }
+    const { userId: user_id } = req.decoded;
+    const workspace_id = req.params.workspace_id || req.query.workspace_id;
 
     if (!workspace_id) return Permissions.workspaceIdMissing(res);
 
-    if (!userId)  return Permissions.error(res);
+    if (!user_id)  return Permissions.error(res);
 
     try {
-      const userWorkspaceCache = await Permissions.getCache(workspace_id, userId);
+      const userWorkspaceCache = await Permissions.getCache(workspace_id, user_id);
 
       if (userWorkspaceCache) {
         if (permission && Permissions.check(Number(userWorkspaceCache), permission)) {
@@ -85,28 +48,23 @@ class Permissions extends BitwisePermissions {
       console.error(e)
     }
 
-    const userWorkspace = await Permissions.getUserWorkspace(userId, workspace_id);
+    const userWorkspace = await WorkspaceService.getUserWorkspace({ user_id, workspace_id });
 
     if (userWorkspace) {
-      console.log('userWorkspace', userWorkspace)
       try {
         await Permissions.setCache(workspace_id, userId, userWorkspace.permissions);
       } catch (e) {
         console.error(e)
       }
 
-      if (permission) {
-        if (Permissions.check(Number(userWorkspace.permissions), permission)) return next();
-      } else {
+      if (permission && Permissions.check(Number(userWorkspace.permissions), permission)) {
         return next();
       }
+
+      return next();
     }
 
     return Permissions.error(res)
-  };
-
-  static getUserWorkspace = async (user_id, workspace_id) => {
-    return WorkspaceService.getUserWorkspace({ user_id, workspace_id });
   };
 }
 

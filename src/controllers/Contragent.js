@@ -6,6 +6,7 @@ import {
   setResponseErrorValidation,
   checkValidationErrors,
 } from "../helpers/errorHandler";
+import { removeEmpty } from '../helpers';
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
 import { validationResult } from 'express-validator/check';
@@ -16,7 +17,23 @@ class Contragent {
     try {
       await checkValidationErrors(req);
 
-      const data = await ContragentService.getList({ json:true });
+      const {
+        workspace_id,
+        order_by_direction = 'desc',
+        order_by_key = 'id',
+      } = req.query;
+
+      const where = removeEmpty({
+        workspace_id,
+      });
+
+      const order = [[order_by_key, order_by_direction]]; // todo add array
+
+      const data = await ContragentService.getList({
+        json: true,
+        where,
+        order,
+      });
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {

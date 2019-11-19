@@ -5,12 +5,7 @@ import Permissions from '../../middlewares/permissions';
 
 const router = require('express').Router();
 
-router.get(
-	'/',
-	checkToken,
-	Permissions.can(),
-	Category.getCategoryList
-);
+router.get('/', checkToken, Permissions.can(), Category.getCategoryList);
 router.get('/:category_id', checkToken, Category.getCategorySingle);
 router.post('/', checkToken, Validation.createCategory, Category.createCategory);
 router.delete('/:category_id', checkToken, Category.deleteCategory);

@@ -24,25 +24,10 @@ class Category {
         order_by_key = 'id',
       } = req.query;
 
-      const {
-        userId
-      } = req.decoded;
-
       const where = removeEmpty({
         type,
         workspace_id,
       });
-
-      // const isIn = await DB.WorkspaceUsers.findOne({
-      //   where: {
-      //     workspace_id,
-      //     user_id: userId
-      //   },
-      // });
-      //
-      // if (!isIn) {
-      //   throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN)
-      // }
 
       const order = [[order_by_key, order_by_direction]]; // todo add array
 
@@ -54,7 +39,6 @@ class Category {
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
-      console.log(err)
       return setResponseError(res, err);
     }
   };
