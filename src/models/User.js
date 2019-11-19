@@ -53,7 +53,8 @@ export default (sequelize) => {
   User.associate = (models) => {
     models.User.hasOne(models.Settings, {
       onDelete: 'CASCADE',
-      foreignKey: 'user_id'
+      foreignKey: 'user_id',
+      as: 'settings',
     });
 
     models.User.hasOne(models.Profile, {

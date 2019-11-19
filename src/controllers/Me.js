@@ -16,11 +16,18 @@ class Me {
         include: [{
           model: DB.Profile,
           attributes: {
-            exclude: ['avatar_id', 'created_at']
+            exclude: ['avatar_id', 'created_at', 'user_id']
           },
           include: [{
-            model: DB.File
+            model: DB.File,
+            as: 'avatar'
           }]
+        }, {
+          model: DB.Settings,
+          as: 'settings',
+          attributes: {
+            exclude: ['created_at', 'id', 'user_id']
+          },
         }]
       });
 

@@ -35,6 +35,15 @@ export const attributes = {
 			key: "id"
 		}
 	},
+	project_id: {
+		type: Sequelize.INTEGER,
+		onDelete: "CASCADE",
+		allowNull: true,
+		references: {
+			model: "projects",
+			key: "id"
+		}
+	},
 	category_id: {
 		type: Sequelize.INTEGER,
 		onDelete: "CASCADE",

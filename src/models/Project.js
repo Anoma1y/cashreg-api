@@ -25,10 +25,6 @@ export const attributes = {
     type: Sequelize.STRING(255),
     allowNull: true,
   },
-  type: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-  },
   created_at: {
     allowNull: false,
     type: Sequelize.DATE,
@@ -45,12 +41,12 @@ export const attributes = {
       return dateToUnix(this.getDataValue('updated_at'))
     },
   },
-  deleted_at: {
+  finished_at: {
     allowNull: true,
     type: Sequelize.DATE,
     defaultValue: null,
     get() {
-      return dateToUnix(this.getDataValue('deleted_at'))
+      return dateToUnix(this.getDataValue('finished_at'))
     },
   }
 };
@@ -59,27 +55,22 @@ export default (sequelize) => {
   const options = {
     updatedAt: 'updated_at',
     createdAt: 'created_at',
-    deletedAt: 'deleted_at',
+    finishedAt: 'finished_at',
   };
 
-  const Category = sequelize.define("categories", attributes, options);
+  const Project = sequelize.define("projects", attributes, options);
 
-  Category.associate = (models) => {
-    // models.Category.belongsTo(models.Workspace, {
+  Project.associate = (models) => {
+    // models.Project.belongsTo(models.Workspace, {
     //   onDelete: 'CASCADE',
     //   foreignKey: 'workspace_id'
     // });
 
-    models.Category.belongsTo(models.Workspace, {
-      onDelete: 'CASCADE',
-      foreignKey: 'workspace_id',
-    });
-
-    models.Transaction.belongsTo(models.Category, {
-      onDelete: 'CASCADE',
-      foreignKey: 'category_id',
-    });
+    // models.Transaction.belongsTo(models.Project, {
+    //   onDelete: 'CASCADE',
+    //   foreignKey: 'category_id',
+    // });
   };
 
-  return Category;
+  return Project;
 }

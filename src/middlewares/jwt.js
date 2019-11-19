@@ -14,6 +14,9 @@ const checkToken = async (req, res, next) => {
     try {
       const token = raffinierenToken(authorization, TOKEN_PREFIX);
       const decode = jwt.decode(token);
+
+      if (!decode) throw new HttpError(ACTION_CODES.AUTHORIZATION_TOKEN_NOT_CORRECT, STATUS_CODES.FORBIDDEN);
+
       const secret = await redisHgetAsync(decode.sessionKey, 'accessToken');
 
       jwt.verify(token, secret, (err, verifyDecoded) => {
@@ -30,7 +33,7 @@ const checkToken = async (req, res, next) => {
   } else {
     setResponseError(res, {
       action: ACTION_CODES.AUTHORIZATION_HEADER_NOT_PRESENT,
-      status: STATUS_CODES.FORBIDDEN,
+      status: STATUS_CODES.UNAUTHORIZED,
       extra: {}
     });
   }

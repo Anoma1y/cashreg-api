@@ -87,7 +87,8 @@ export default (sequelize) => {
 
     models.Profile.hasOne(models.File, {
       onDelete: 'CASCADE',
-      foreignKey: 'id'
+      foreignKey: 'id',
+      as: 'avatar',
     })
   };
 
