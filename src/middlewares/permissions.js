@@ -26,9 +26,12 @@ class Permissions extends BitwisePermissions {
   static clearAllCacheByWorkspaceId = async (wsid) =>
     redisDelAsync(`workspace:${wsid}`);
 
+  static getWorkspaceId = req => req.params.workspace_id || req.query.workspace_id || req.body.workspace_id;
+
   static can = (permission) => async (req, res, next) => {
     const { userId: user_id } = req.decoded;
-    const workspace_id = req.params.workspace_id || req.query.workspace_id;
+
+    const workspace_id = Permissions.getWorkspaceId(req);
 
     if (!workspace_id) return Permissions.workspaceIdMissing(res);
 
@@ -36,10 +39,13 @@ class Permissions extends BitwisePermissions {
 
     try {
       const userWorkspaceCache = await Permissions.getCache(workspace_id, user_id);
-
       if (userWorkspaceCache) {
-        if (permission && Permissions.check(Number(userWorkspaceCache), permission)) {
-          return next();
+        if (permission) {
+          if (Permissions.check(Number(userWorkspaceCache), permission)) {
+            return next();
+          }
+
+          return Permissions.error(res);
         }
 
         return next();
@@ -52,13 +58,17 @@ class Permissions extends BitwisePermissions {
 
     if (userWorkspace) {
       try {
-        await Permissions.setCache(workspace_id, userId, userWorkspace.permissions);
+        await Permissions.setCache(workspace_id, user_id, userWorkspace.permissions);
       } catch (e) {
         console.error(e)
       }
 
-      if (permission && Permissions.check(Number(userWorkspace.permissions), permission)) {
-        return next();
+      if (permission) {
+        if (Permissions.check(Number(userWorkspace.permissions), permission)) {
+          return next();
+        }
+
+        return Permissions.error(res);
       }
 
       return next();

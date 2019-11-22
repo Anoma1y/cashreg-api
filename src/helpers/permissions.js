@@ -17,6 +17,7 @@ class BitwisePermissions {
 		workspace_rename: '0x1000',
 		workspace_delete: '0x4000',
 	};
+
 	// 0x40000	0x800	0x2000	0x8000	0x20000	0x40	0x100000	0x400000	0x1000000	0x200000	0x800000	0x2000000
 	static convertPerms = permNumber => {
 		if (isNaN(Number(permNumber)))

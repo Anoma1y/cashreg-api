@@ -8,6 +8,10 @@ export const attributes = {
 		autoIncrement: true,
 		type: Sequelize.INTEGER,
 	},
+	name: {
+		allowNull: false,
+		type: Sequelize.STRING(50),
+	},
 	user_id: {
 		type: Sequelize.INTEGER,
 		onDelete: "CASCADE",
