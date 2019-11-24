@@ -19,71 +19,95 @@ class Contragent {
   getList = async (options = {}) => DB.Contragent.findAll(options);
 
   create = async (data) => {
-    const { name, description, workspace_id, type, } = data;
-
     try {
-      const category = await DB.Contragent.findOne({ where: { name } });
+      const contragent = await DB.Contragent.findOne({ where: { title: data.title } });
 
-      if (category) {
+      if (contragent) {
         throw {
           action: ACTION_CODES.USER_ALREADY_EXISTS,
           status: STATUS_CODES.CONFLICT,
         };
       }
-
+      console.log(data)
       return DB.Contragent.create({
-        name,
-        description,
-        workspace_id,
-        type,
+        ...data,
       });
     } catch (e) {
       throw new HttpError(e.action, e.status);
     }
   };
 
-  delete = async (data, options = {}) => {
-    if (typeof data === 'object') {
-      return DB.Contragent.destroy({
-        where: {
-          ...data
-        }, ...options
-      });
+  delete = async (contragent_id, workspace_id) => {
+    const contragent = await this.getSingle(contragent_id);
+
+    if (!contragent) {
+      throw {
+        action: ACTION_CODES.CONTRAGENT_NOT_FOUND,
+        status: STATUS_CODES.NOT_FOUND,
+      };
     }
 
-    return DB.Contragent.destroy({ where: { id: data }, ...options });
+    if (parseInt(contragent.workspace_id) !== parseInt(workspace_id)) { // todo add archived at
+      throw {
+        action: ACTION_CODES.UNKNOWN_ERROR,
+        status: STATUS_CODES.FORBIDDEN,
+      };
+    }
+
+    return DB.Contragent.destroy({ where: { id: contragent_id } });
   };
 
-  edit = async (category_id, data) => {
-    const { name, description, workspace_id, type, } = data;
-
+  edit = async (contragent_id, data) => {
     try {
-      const category = await this.getSingle(category_id);
+      const contragent = await this.getSingle(contragent_id);
 
-      if (!category) {
+      if (!contragent) {
         throw {
           action: ACTION_CODES.CATEGORY_NOT_FOUND,
           status: STATUS_CODES.NOT_FOUND,
         };
       }
 
-      if (name) {
-        category['name'] = name;
+      if (parseInt(contragent.workspace_id) !== parseInt(data.workspace_id)) {
+        throw {
+          action: ACTION_CODES.UNKNOWN_ERROR,
+          status: STATUS_CODES.FORBIDDEN,
+        };
       }
 
-      if (description) {
-        category['description'] = description;
+      if (data.title) {
+        contragent['title'] = data.title;
       }
 
-      if (type) {
-        category['type'] = type;
+      if (data.longTitle) {
+        contragent['longTitle'] = data.longTitle;
       }
 
-      if (workspace_id) {
-        category['workspace_id'] = workspace_id;
+      if (data.payment_info) {
+        contragent['payment_info'] = data.payment_info;
       }
 
-      return category.save();
+      if (data.inn) {
+        contragent['inn'] = data.inn;
+      }
+
+      if (data.kpp) {
+        contragent['kpp'] = data.kpp;
+      }
+
+      if (data.active !== undefined) {
+        contragent['active'] = data.active;
+      }
+
+      if (data.title) {
+        contragent['title'] = data.title;
+      }
+
+      if (data.description) {
+        contragent['description'] = data.description;
+      }
+
+      return contragent.save();
     } catch (e) {
       throw new HttpError(e.action, e.status);
     }

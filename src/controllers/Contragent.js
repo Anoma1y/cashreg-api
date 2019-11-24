@@ -1,24 +1,31 @@
-import DB from '../config/db';
 import {
-  errorFormatter,
-  HttpError,
   setResponseError,
-  setResponseErrorValidation,
   checkValidationErrors,
 } from "../helpers/errorHandler";
 import { removeEmpty } from '../helpers';
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
-import { validationResult } from 'express-validator/check';
 import ContragentService from '../services/contragent';
 
 class Contragent {
+  static ContragentData = (req) => ({
+    workspace_id: req.params.workspace_id,
+    title: req.body.title,
+    longTitle: req.body.longTitle,
+    description: req.body.description,
+    inn: req.body.inn,
+    kpp: req.body.kpp,
+    payment_info: req.body.payment_info,
+    active: req.body.active,
+  });
+
   getContragentList = async (req, res) => {
     try {
       await checkValidationErrors(req);
 
+      const { workspace_id } = req.params;
+
       const {
-        workspace_id,
         order_by_direction = 'desc',
         order_by_key = 'id',
       } = req.query;
@@ -45,14 +52,19 @@ class Contragent {
     try {
       await checkValidationErrors(req);
 
-      const { category_id } = req.params;
-      const category = await ContragentService.getSingle(category_id, { json: true, });
+      const { workspace_id, contragent_id } = req.params;
 
-      if (!category) {
-        return res.status(STATUS_CODES.NOT_FOUND).send()
+      const contragent = await ContragentService.getSingle(contragent_id, { json: true, });
+
+      if (!contragent) {
+        return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.OK).json(category);
+      if (parseInt(contragent.workspace_id) !== parseInt(workspace_id)) {
+        return res.status(STATUS_CODES.FORBIDDEN).send();
+      }
+
+      return res.status(STATUS_CODES.OK).json(contragent);
 
     } catch (err) {
       return setResponseError(res, err)
@@ -63,12 +75,11 @@ class Contragent {
     try {
       await checkValidationErrors(req);
 
-      const { name, description, workspace_id, type, } = req.body;
-
-      await ContragentService.create({ name, description, workspace_id, type, });
+      const createContragent = await ContragentService.create(Contragent.ContragentData(req));
 
       return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.USER_CREATED
+        action: ACTION_CODES.CONTRAGENT_CREATED,
+        data: createContragent
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -76,12 +87,12 @@ class Contragent {
   };
 
   deleteContragent = async (req, res) => {
-    const { category_id } = req.params;
+    const { workspace_id, contragent_id } = req.params;
 
     try {
-      const categoryDelete = await ContragentService.delete(category_id);
+      const contragentDelete = await ContragentService.delete(contragent_id, workspace_id);
 
-      if (categoryDelete === 0) {
+      if (contragentDelete === 0) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
@@ -95,10 +106,7 @@ class Contragent {
     try {
       await checkValidationErrors(req);
 
-      const { category_id } = req.params;
-      const { name, description, workspace_id, type, } = req.body;
-
-      const data = await ContragentService.edit(category_id, { name, description, workspace_id, type, });
+      const data = await ContragentService.edit(req.params.contragent_id, Contragent.ContragentData(req));
 
       return res.status(STATUS_CODES.OK).json(data)
     } catch (err) {
