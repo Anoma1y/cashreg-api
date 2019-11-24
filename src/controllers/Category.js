@@ -50,8 +50,12 @@ class Category {
       const { category_id } = req.params;
       const category = await CategoryService.getSingle(category_id, { json: true, });
 
+      if (parseInt(category.workspace_id) !== parseInt(req.query.workspace_id)) {
+        return res.status(STATUS_CODES.FORBIDDEN).send();
+      }
+
       if (!category) {
-        return res.status(STATUS_CODES.NOT_FOUND).send()
+        return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
       return res.status(STATUS_CODES.OK).json(category);
@@ -67,10 +71,11 @@ class Category {
 
       const { name, description, workspace_id, type, } = req.body;
 
-      await CategoryService.create({ name, description, workspace_id, type, });
+      const createCategory = await CategoryService.create({ name, description, workspace_id, type, });
 
       return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.USER_CREATED
+        action: ACTION_CODES.CATEGORY_CREATED,
+        data: createCategory,
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -79,9 +84,10 @@ class Category {
 
   deleteCategory = async (req, res) => {
     const { category_id } = req.params;
+    const { workspace_id } = req.query;
 
     try {
-      const categoryDelete = await CategoryService.delete(category_id);
+      const categoryDelete = await CategoryService.delete(category_id, workspace_id);
 
       if (categoryDelete === 0) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
