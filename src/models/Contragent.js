@@ -38,11 +38,11 @@ export const attributes = {
     type: Sequelize.BOOLEAN,
     defaultValue: true,
   },
-  contrAgentInn: {
+  inn: {
     allowNull: false,
     type: Sequelize.STRING(20),
   },
-  contrAgentKpp: {
+  kpp: {
     allowNull: false,
     type: Sequelize.STRING(50),
   },
@@ -62,12 +62,12 @@ export const attributes = {
       return dateToUnix(this.getDataValue('updated_at'))
     },
   },
-  deleted_at: {
+  archived_at: {
     allowNull: true,
     type: Sequelize.DATE,
     defaultValue: null,
     get() {
-      return dateToUnix(this.getDataValue('deleted_at'))
+      return dateToUnix(this.getDataValue('archived_at'))
     },
   },
 };
@@ -76,7 +76,7 @@ export default (sequelize) => {
   const options = {
     updatedAt: 'updated_at',
     createdAt: 'created_at',
-    deletedAt: 'deleted_at',
+    deletedAt: 'archived_at',
   };
 
   const Contragent = sequelize.define("contragents", attributes, options);

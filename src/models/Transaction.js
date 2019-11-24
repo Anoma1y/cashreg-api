@@ -14,7 +14,6 @@ export const attributes = {
 	},
 	user_id: {
 		type: Sequelize.INTEGER,
-		onDelete: "CASCADE",
 		allowNull: false,
 		references: {
 			model: "users",
@@ -23,7 +22,6 @@ export const attributes = {
 	},
 	workspace_id: {
 		type: Sequelize.INTEGER,
-		onDelete: "CASCADE",
 		allowNull: false,
 		references: {
 			model: "workspaces",
@@ -32,7 +30,6 @@ export const attributes = {
 	},
 	contragent_id: {
 		type: Sequelize.INTEGER,
-		onDelete: "CASCADE",
 		allowNull: true,
 		references: {
 			model: "contragents",
@@ -41,7 +38,6 @@ export const attributes = {
 	},
 	project_id: {
 		type: Sequelize.INTEGER,
-		onDelete: "CASCADE",
 		allowNull: true,
 		references: {
 			model: "projects",
@@ -50,7 +46,6 @@ export const attributes = {
 	},
 	category_id: {
 		type: Sequelize.INTEGER,
-		onDelete: "CASCADE",
 		allowNull: false,
 		references: {
 			model: "categories",
@@ -59,7 +54,6 @@ export const attributes = {
 	},
 	currency_id: {
 		type: Sequelize.INTEGER,
-		onDelete: "CASCADE",
 		allowNull: false,
 		references: {
 			model: "currencies",
