@@ -8,11 +8,9 @@ const createCategory = [
     .trim()
     .isLength({ min: 1, max: 255 }),
   check('description', ACTION_CODES.EMPTY_FIELD_DESCRIPTION)
+    .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('workspace_id', ACTION_CODES.EMPTY_FIELD_WORKSPACE_ID)
-    .exists()
-    .isNumeric(),
   check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
     .exists()
     .custom(checkTransactionType)
@@ -28,9 +26,6 @@ const editCategory = [
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('workspace_id', ACTION_CODES.EMPTY_FIELD_WORKSPACE_ID)
-    .optional()
-    .isNumeric(),
   check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
     .optional()
     .isNumeric()

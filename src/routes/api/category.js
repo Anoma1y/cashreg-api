@@ -3,7 +3,7 @@ import { checkToken } from '../../middlewares/jwt';
 import Validation from './validation/category'
 import Permissions from '../../middlewares/permissions';
 
-const router = require('express').Router();
+const router = require('express').Router({ mergeParams : true });
 
 router.get('/',
 	checkToken,
@@ -13,6 +13,7 @@ router.get('/',
 
 router.get('/:category_id',
 	checkToken,
+	Permissions.can(),
 	Category.getCategorySingle
 );
 
@@ -25,10 +26,12 @@ router.post('/',
 
 router.delete('/:category_id',
 	checkToken,
+	Permissions.can('category_delete'),
 	Category.deleteCategory);
 
 router.patch('/:category_id',
 	checkToken,
+	Permissions.can('category_edit'),
 	Validation.editCategory,
 	Category.editCategory
 );
