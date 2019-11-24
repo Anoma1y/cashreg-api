@@ -15,11 +15,11 @@ router.use('/session', SessionRouter);
 router.use('/file', FileRouter);
 router.use('/user', UserRouter);
 router.use('/me', MeRouter);
-router.use('/category', CategoryRouter);
-router.use('/contragent', ContragentRouter);
+router.use('/:workspace_id/category', CategoryRouter);
+router.use('/:workspace_id/contragent', ContragentRouter);
 router.use('/currency', CurrencyRouter);
-router.use('/transaction', TransactionRouter);
-router.use('/cash', CashRouter);
+router.use('/:workspace_id/transaction', TransactionRouter);
+router.use('/:workspace_id/cash', CashRouter);
 router.use('/permission', PermissionRoute);
 router.use('/workspace', WorkspaceRoute);
 
