@@ -1,25 +1,28 @@
-import DB from '../config/db';
 import {
-  errorFormatter,
-  HttpError,
   setResponseError,
-  setResponseErrorValidation,
   checkValidationErrors,
 } from "../helpers/errorHandler";
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
-import { validationResult } from 'express-validator/check';
 import { removeEmpty } from '../helpers';
 import CategoryService from '../services/category';
 
 class Category {
+  static CategoryData = (req) => ({
+    workspace_id: req.params.workspace_id,
+    name: req.body.name,
+    description: req.body.description,
+    type: req.body.type,
+  });
+
   getCategoryList = async (req, res) => {
     try {
       await checkValidationErrors(req);
 
+      const { workspace_id } = req.params;
+
       const {
         type,
-        workspace_id,
         order_by_direction = 'desc',
         order_by_key = 'id',
       } = req.query;
@@ -47,15 +50,15 @@ class Category {
     try {
       await checkValidationErrors(req);
 
-      const { category_id } = req.params;
+      const { workspace_id, category_id } = req.params;
       const category = await CategoryService.getSingle(category_id, { json: true, });
-
-      if (parseInt(category.workspace_id) !== parseInt(req.query.workspace_id)) {
-        return res.status(STATUS_CODES.FORBIDDEN).send();
-      }
 
       if (!category) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
+      }
+
+      if (parseInt(category.workspace_id) !== parseInt(workspace_id)) {
+        return res.status(STATUS_CODES.FORBIDDEN).send();
       }
 
       return res.status(STATUS_CODES.OK).json(category);
@@ -69,9 +72,7 @@ class Category {
     try {
       await checkValidationErrors(req);
 
-      const { name, description, workspace_id, type, } = req.body;
-
-      const createCategory = await CategoryService.create({ name, description, workspace_id, type, });
+      const createCategory = await CategoryService.create(Category.CategoryData(req));
 
       return res.status(STATUS_CODES.CREATED).json({
         action: ACTION_CODES.CATEGORY_CREATED,
@@ -84,7 +85,7 @@ class Category {
 
   deleteCategory = async (req, res) => {
     const { category_id } = req.params;
-    const { workspace_id } = req.query;
+    const { workspace_id } = req.params;
 
     try {
       const categoryDelete = await CategoryService.delete(category_id, workspace_id);
@@ -103,10 +104,7 @@ class Category {
     try {
       await checkValidationErrors(req);
 
-      const { category_id } = req.params;
-      const { name, description, workspace_id, type, } = req.body;
-
-      const data = await CategoryService.edit(category_id, { name, description, workspace_id, type, });
+      const data = await CategoryService.edit(req.params.category_id, Category.CategoryData(req));
 
       return res.status(STATUS_CODES.OK).json(data)
     } catch (err) {

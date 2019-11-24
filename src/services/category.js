@@ -42,16 +42,24 @@ class Category {
     }
   };
 
-  delete = async (data, options = {}) => {
-    if (typeof data === 'object') {
-      return DB.Category.destroy({
-        where: {
-          ...data
-        }, ...options
-      });
+  delete = async (category_id, workspace_id) => {
+    const category = await this.getSingle(category_id);
+
+    if (!category) {
+      throw {
+        action: ACTION_CODES.CATEGORY_NOT_FOUND,
+        status: STATUS_CODES.NOT_FOUND,
+      };
     }
 
-    return DB.Category.destroy({ where: { id: data }, ...options });
+    if (parseInt(category.workspace_id) !== parseInt(workspace_id)) {
+      throw {
+        action: ACTION_CODES.UNKNOWN_ERROR,
+        status: STATUS_CODES.FORBIDDEN,
+      };
+    }
+
+    return DB.Category.destroy({ where: { id: category_id } });
   };
 
   edit = async (category_id, data) => {
@@ -67,6 +75,13 @@ class Category {
         };
       }
 
+      if (parseInt(category.workspace_id) !== parseInt(workspace_id)) {
+        throw {
+          action: ACTION_CODES.UNKNOWN_ERROR,
+          status: STATUS_CODES.FORBIDDEN,
+        };
+      }
+
       if (name) {
         category['name'] = name;
       }
@@ -77,10 +92,6 @@ class Category {
 
       if (type) {
         category['type'] = type;
-      }
-
-      if (workspace_id) {
-        category['workspace_id'] = workspace_id;
       }
 
       return category.save();
