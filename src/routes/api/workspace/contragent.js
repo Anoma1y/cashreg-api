@@ -1,7 +1,7 @@
-import Contragent from '../../controllers/Contragent';
-import { checkToken } from '../../middlewares/jwt';
-import Validation from './validation/contragent'
-import Permissions from '../../middlewares/permissions';
+import Contragent from '../../../controllers/Contragent';
+import { checkToken } from '../../../middlewares/jwt';
+import Validation from '../validation/contragent'
+import Permissions from '../../../middlewares/permissions';
 
 const router = require('express').Router({ mergeParams: true, });
 

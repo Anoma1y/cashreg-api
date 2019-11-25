@@ -8,9 +8,6 @@ const validateQueryArray = val => {
 };
 
 const getCash = [
-	query('workspace_id', ACTION_CODES.EMPTY_FIELD_WORKSPACE_ID)
-		.exists()
-		.isNumeric(),
 	query('currency_id', ACTION_CODES.EMPTY_FIELD_CURRENCY_ID)
 		.optional()
 		.custom(validateQueryArray),

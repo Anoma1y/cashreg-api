@@ -1,12 +1,21 @@
-import Workspace from '../../controllers/Workspace';
-import { checkToken } from '../../middlewares/jwt';
-import Permissions from '../../middlewares/permissions';
-import Validation from './validation/workspace';
-
 const router = require('express').Router();
+import Workspace from '../../../controllers/Workspace';
+import { checkToken } from '../../../middlewares/jwt';
+import Permissions from '../../../middlewares/permissions';
+import Validation from '../validation/workspace';
+import CategoryRouter from './category';
+import ContragentRouter from './category';
+import TransactionRouter from './transaction';
+import CashRouter from './cash';
 
 router.get('/', checkToken, Workspace.getWorkspaceList);
 router.get('/:workspace_id', checkToken, Workspace.getSingleWorkspace);
+
+router.use('/:workspace_id/category', CategoryRouter);
+router.use('/:workspace_id/contragent', ContragentRouter);
+router.use('/:workspace_id/transaction', TransactionRouter);
+router.use('/:workspace_id/cash', CashRouter);
+
 router.post('/:workspace/archived', checkToken, Workspace.archivedWorkspace);
 router.patch('/:workspace', checkToken, Workspace.editWorkspace);
 
