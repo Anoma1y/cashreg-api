@@ -5,6 +5,7 @@ import Permissions from '../../../middlewares/permissions';
 import Validation from '../validation/workspace';
 import CategoryRouter from './category';
 import ContragentRouter from './category';
+import ProjectRouter from './project';
 import TransactionRouter from './transaction';
 import CashRouter from './cash';
 
@@ -12,6 +13,7 @@ router.get('/', checkToken, Workspace.getWorkspaceList);
 router.get('/:workspace_id', checkToken, Workspace.getSingleWorkspace);
 
 router.use('/:workspace_id/category', CategoryRouter);
+router.use('/:workspace_id/project', ProjectRouter);
 router.use('/:workspace_id/contragent', ContragentRouter);
 router.use('/:workspace_id/transaction', TransactionRouter);
 router.use('/:workspace_id/cash', CashRouter);

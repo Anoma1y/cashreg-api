@@ -27,7 +27,8 @@ router.post('/',
 router.delete('/:category_id',
 	checkToken,
 	Permissions.can('category_delete'),
-	Category.deleteCategory);
+	Category.deleteCategory
+);
 
 router.patch('/:category_id',
 	checkToken,

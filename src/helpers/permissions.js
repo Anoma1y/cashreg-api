@@ -8,6 +8,9 @@ class BitwisePermissions {
 		category_create: '0x20',
 		category_edit: '0x10',
 		category_delete: '0x4',
+		project_create: '0x40000',
+		project_edit: '0x800',
+		project_delete: '0x2000',
 		contragent_create: '0x4000000',
 		contragent_edit: '0x20000000',
 		contragent_delete: '0x40000000',
@@ -18,7 +21,7 @@ class BitwisePermissions {
 		workspace_delete: '0x4000',
 	};
 
-	// 0x40000	0x800	0x2000	0x8000	0x20000	0x40	0x100000	0x400000	0x1000000	0x200000	0x800000	0x2000000
+	// 0x8000	0x20000	0x40	0x100000	0x400000	0x1000000	0x200000	0x800000	0x2000000
 	static convertPerms = permNumber => {
 		if (isNaN(Number(permNumber)))
 			throw new TypeError(`Expected permissions number, and received ${typeof permNumber} instead.`);
