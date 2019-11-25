@@ -4,6 +4,7 @@ import FileModel from '../models/File';
 import UserModel from '../models/User';
 import ActionCodesModel from '../models/ActionCodes';
 import CategoryModel from '../models/Category';
+import ProjectModel from '../models/Project';
 import ContragentModel from '../models/Contragent';
 import SessionHistoryModel from '../models/SessionHistory';
 import ProfileModel from '../models/Profile';
@@ -57,6 +58,7 @@ const db = {
   Profile: ProfileModel(sequelize),
   Settings: SettingsModel(sequelize),
   Category: CategoryModel(sequelize),
+  Project: ProjectModel(sequelize),
   Contragent: ContragentModel(sequelize),
   Workspace: WorkspaceModel(sequelize),
   WorkspaceUsers: WorkspaceUsersModel(sequelize),

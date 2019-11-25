@@ -38,6 +38,10 @@ export const attributes = {
     type: Sequelize.BOOLEAN,
     defaultValue: true,
   },
+  type: {
+    allowNull: false,
+    type: Sequelize.INTEGER,
+  },
   inn: {
     allowNull: false,
     type: Sequelize.STRING(20),
