@@ -2,6 +2,7 @@ import DB, { sequelize } from '../config/db';
 import { HttpError } from '../helpers/errorHandler';
 import STATUS_CODES from '../helpers/statusCodes';
 import ACTION_CODES from '../helpers/actionCodes';
+import CashService from './cash';
 
 class Transaction {
   static TransactionInclude = [
@@ -53,17 +54,26 @@ class Transaction {
     }
   ];
 
-  getSingle = async (transaction_id, options = {}, expand = true) => {
-    return DB.Transaction.findByPk(transaction_id, {
+  checkNegativeCash = async (data, reverse = false) => {
+    const { workspace_id, currency_id, sum, type } = data;
+
+    const cash = await CashService.getCash(workspace_id);
+    const currentCash = cash.find(c => c.currency_id === currency_id);
+
+    return type === (reverse ? 2 : 1) && (currentCash.sum - sum) < 0;
+  };
+
+  getSingle = async (id, workspace_id, expand = true) => {
+    return DB.Transaction.findOne({
+      where: { id, workspace_id },
       attributes: {
-        exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
+        exclude: expand ? [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id'] : [],
       },
       include: expand ? [
         ...Transaction.TransactionInclude,
         ...Transaction.TransactionIncludeSingle,
       ] : [],
       json: true,
-      ...options,
     });
   };
 
@@ -94,8 +104,13 @@ class Transaction {
       user_id,
     } = data;
 
+    if (await this.checkNegativeCash(data)) {
+      throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.UNPROCESSABLE_ENTITY);
+    }
+
     return await sequelize.transaction().then(async (transaction) => {
       try {
+
         const transactionCreate = await DB.Transaction.create(
           {
             user_id,
@@ -111,7 +126,7 @@ class Transaction {
           {transaction}
         );
 
-        if (file_id.length !== 0) {
+        if (file_id && file_id.length !== 0) {
           await DB.TransactionFiles.bulkCreate(file_id.map(id => ({
               file_id: id,
               transaction_id: transactionCreate.id,
@@ -132,48 +147,42 @@ class Transaction {
   };
 
   editTransaction = async (transaction_id, data) => {
-    try {
-      const transaction = await this.getSingle(transaction_id);
-
-      if (!transaction) {
-        throw {
-          action: ACTION_CODES.TRANSACTION_NOT_FOUND,
-          status: STATUS_CODES.NOT_FOUND,
-        };
-      }
-
-      if (transaction.invalidated_at !== null) {
-        throw {
-          action: ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED,
-          status: STATUS_CODES.FORBIDDEN,
-        }
-      }
-
-      Object.keys(data).forEach(key => {
-        transaction.set(key, data[key]);
-      });
-
-      return transaction.save();
-    } catch (e) {
-      throw new HttpError(e.action, e.status);
-    }
-  };
-
-  invalidate = async (transaction_id) => {
-    const transaction = await DB.Transaction.findByPk(transaction_id);
+    const transaction = await this.getSingle(transaction_id);
 
     if (!transaction) {
-      throw {
-        action: ACTION_CODES.TRANSACTION_NOT_FOUND,
-        status: STATUS_CODES.NOT_FOUND,
-      };
+      throw new HttpError(ACTION_CODES.TRANSACTION_NOT_FOUND, STATUS_CODES.NOT_FOUND)
     }
 
     if (transaction.invalidated_at !== null) {
-      throw {
-        action: ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED,
-        status: STATUS_CODES.CONFLICT,
-      };
+      throw new HttpError(ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED, STATUS_CODES.FORBIDDEN)
+    }
+
+    Object.keys(data).forEach(key => {
+      transaction.set(key, data[key]);
+    });
+
+    return transaction.save();
+  };
+
+  invalidate = async (id, workspace_id) => {
+    const transaction = await this.getSingle(id, workspace_id, false);
+
+    if (!transaction) {
+      throw new HttpError(ACTION_CODES.TRANSACTION_NOT_FOUND, STATUS_CODES.NOT_FOUND)
+    }
+
+    if (transaction.invalidated_at !== null) {
+      throw new HttpError(ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED, STATUS_CODES.CONFLICT)
+    }
+
+    if (await this.checkNegativeCash({
+      transaction_id: id,
+      workspace_id,
+      currency_id: transaction.currency_id,
+      sum: transaction.sum,
+      type: transaction.type,
+    }, true)) {
+      throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.UNPROCESSABLE_ENTITY);
     }
 
     transaction.invalidated_at = +new Date();

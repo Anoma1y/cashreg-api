@@ -22,6 +22,7 @@ class Transaction {
   getTransactionList = async (req, res) => {
     try {
       await checkValidationErrors(req);
+      const { workspace_id } = req.params;
 
       const {
         register_date_start,
@@ -31,6 +32,7 @@ class Transaction {
         currency_id,
         category_id,
         contragent_id,
+        project_id,
         type,
         order_by_direction = 'desc',
         order_by_key = 'id',
@@ -40,8 +42,34 @@ class Transaction {
         category_id,
         currency_id,
         contragent_id,
+        workspace_id,
+        project_id,
         type,
       });
+
+      if (where.category_id && where.category_id.length > 1) {
+        where['category_id'] = {
+          [Op.in]: category_id.replace(/\s/g, '').split(',')
+        }
+      }
+
+      if (where.currency_id && where.currency_id.length > 1) {
+        where['currency_id'] = {
+          [Op.in]: currency_id.replace(/\s/g, '').split(',')
+        }
+      }
+
+      if (where.contragent_id && where.contragent_id.length > 1) {
+        where['contragent_id'] = {
+          [Op.in]: contragent_id.replace(/\s/g, '').split(',')
+        }
+      }
+
+      if (where.project_id && where.project_id.length > 1) {
+        where['project_id'] = {
+          [Op.in]: project_id.replace(/\s/g, '').split(',')
+        }
+      }
 
       where['invalidated_at'] = {
         [Op.eq]: null,
@@ -80,6 +108,7 @@ class Transaction {
       const order = [[order_by_key, order_by_direction]]; // todo add array
 
       const total_records = await DB.Transaction.count({ where });
+
       const { page, num_on_page, offset, limit } = getPagination(req, total_records);
 
       if (total_records === 0) {
@@ -113,8 +142,8 @@ class Transaction {
     try {
       await checkValidationErrors(req);
 
-      const { transaction_id } = req.params;
-      const transaction = await TransactionService.getSingle(transaction_id);
+      const { workspace_id, transaction_id } = req.params;
+      const transaction = await TransactionService.getSingle(transaction_id, workspace_id);
 
       if (!transaction) {
         return res.status(STATUS_CODES.NOT_FOUND).send()
@@ -145,12 +174,13 @@ class Transaction {
         workspace_id,
       });
 
-      const transaction = await TransactionService.getSingle(transactionCreate.id);
+      const transaction = await TransactionService.getSingle(transactionCreate.id, workspace_id);
 
       // await redisDelAsync(`cash:${workspace_id}`);
 
       return res.status(STATUS_CODES.CREATED).json(transaction);
     } catch (err) {
+      console.log(err)
       return setResponseError(res, err)
     }
   };
@@ -190,9 +220,9 @@ class Transaction {
     try {
       await checkValidationErrors(req);
 
-      const { transaction_id } = req.params;
+      const { workspace_id, transaction_id } = req.params;
 
-      const transaction = await TransactionService.invalidate(transaction_id);
+      const transaction = await TransactionService.invalidate(transaction_id, workspace_id);
 
       return res.status(STATUS_CODES.OK).json(transaction);
     } catch (err) {

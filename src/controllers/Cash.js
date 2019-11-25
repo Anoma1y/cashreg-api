@@ -33,11 +33,10 @@ class Cash {
           type,
           date_from,
           date_to,
+        },
+        params: {
           workspace_id,
         },
-        decoded: {
-          userId: user_id,
-        }
       } = req;
 
       let cash = [];
@@ -52,14 +51,14 @@ class Cash {
       })).length !== 0;
 
       if (isFilter) {
-        cash = await CashService.getCash({ user_id, query: req.query });
+        cash = await CashService.getCash(workspace_id, req.query); // todo fix
       } else {
         const cacheCash = null; /*await redisGetAsync(`cash:${workspace_id}`);*/
 
         if (cacheCash) {
           cash = JSON.parse(cacheCash);
         } else {
-          cash = await CashService.getCash({ user_id, query: { workspace_id } });
+          cash = await CashService.getCash(workspace_id);
 
           await redisSetAsync(`cash:${workspace_id}`, JSON.stringify(cash), 'EX', 3600);
         }

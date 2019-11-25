@@ -9,8 +9,8 @@ export const attributes = {
 		type: Sequelize.INTEGER,
 	},
 	name: {
-		allowNull: false,
-		type: Sequelize.STRING(50),
+		allowNull: true,
+		type: Sequelize.STRING(100),
 	},
 	user_id: {
 		type: Sequelize.INTEGER,

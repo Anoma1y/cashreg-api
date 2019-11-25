@@ -8,30 +8,26 @@ import ACTION_CODES from '../helpers/actionCodes';
 import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
 
+const getRawWhereIn = (field, arr, separate = true) => { // todo go to utils
+	if (!arr) return '';
+
+	const formattedArray = arr.split(',').filter(Boolean).join(',');
+
+	return `${separate ? 'and ' : ''}${field} in (${formattedArray})`;
+};
+
+const getRawWhere = (field, val, separate = true) => val ? `${separate ? 'and ' : ''}${field} = ${val}` : ''; // todo go to utils
+
 class Cash {
-	getCash = async (data) => {
+	getCash = async (workspace_id, query = {}) => {
 		const {
-			user_id,
-			query: {
-				date_from,
-				date_to,
-				category_id,
-				contragent_id,
-				currency_id,
-				workspace_id,
-				type,
-			},
-		} = data;
-
-		const getRawWhereIn = (field, arr, separate = true) => {
-			if (!arr) return '';
-
-			const formattedArray = arr.split(',').filter(Boolean).join(',');
-
-			return `${separate ? 'and ' : ''}${field} in (${formattedArray})`;
-		};
-
-		const getRawWhere = (field, val, separate = true) => val ? `${separate ? 'and ' : ''}${field} = ${val}` : '';
+			date_from,
+			date_to,
+			category_id,
+			contragent_id,
+			currency_id,
+			type,
+		} = query;
 
 		try {
 			const [data] = await DB.sequelize.query(`
@@ -45,7 +41,7 @@ class Cash {
 	        	${getRawWhere('t.type', type)}
 				)
 				from currencies as c
-				WHERE exists(SELECT workspace_id, user_id FROM workspace_users as wu WHERE wu.user_id = ${user_id} AND wu.workspace_id = ${workspace_id})
+				WHERE exists(SELECT workspace_id FROM workspace_users as wu WHERE wu.workspace_id = ${workspace_id})
 				${getRawWhereIn('c.id', currency_id)}
 			`, {
 				json: true,
