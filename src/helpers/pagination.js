@@ -2,6 +2,7 @@ const NUM_ON_PAGE = 20;
 
 export const getPagination = (req, total_records) => {
 	let page = parseInt(req.query.page || 1);
+
 	let num_on_page = parseInt(req.query.num_on_page || NUM_ON_PAGE);
 
 	if (num_on_page > 100) {

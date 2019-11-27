@@ -2,10 +2,11 @@ import {
   setResponseError,
   checkValidationErrors,
 } from "../helpers/errorHandler";
+import { getWhere } from '../helpers/sql';
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
-import { removeEmpty } from '../helpers';
 import ProjectService from '../services/project';
+import StructuredDataService from '../services/structuredData';
 
 class Project {
   static ProjectData = (req) => ({
@@ -21,27 +22,21 @@ class Project {
 
       const { workspace_id } = req.params;
 
-      const {
-        type,
-        order_by_direction = 'desc',
-        order_by_key = 'id',
-      } = req.query;
+      const where = getWhere(
+        req.query,
+        {
+          queryList: ['type', 'contragent_id'],
+          maybeMultipleQuery: ['contragent_id'],
+        }
+      );
 
-      const where = removeEmpty({
-        type,
-        workspace_id,
-      });
+      where['workspace_id'] = workspace_id;
 
-      const order = [[order_by_key, order_by_direction]]; // todo add array
-
-      const data = await ProjectService.getList({
-        json: true,
-        where,
-        order,
-      });
+      const data = await StructuredDataService.withPagination(req, where, ProjectService.count, ProjectService.getList);
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
+      console.log(err)
       return setResponseError(res, err);
     }
   };
@@ -51,14 +46,11 @@ class Project {
       await checkValidationErrors(req);
 
       const { workspace_id, project_id } = req.params;
-      const project = await ProjectService.getSingle(project_id, { json: true, });
+
+      const project = await ProjectService.getSingle(project_id, workspace_id, { json: true, });
 
       if (!project) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
-      }
-
-      if (parseInt(project.workspace_id) !== parseInt(workspace_id)) {
-        return res.status(STATUS_CODES.FORBIDDEN).send();
       }
 
       return res.status(STATUS_CODES.OK).json(project);
@@ -84,8 +76,7 @@ class Project {
   };
 
   deleteProject = async (req, res) => {
-    const { project_id } = req.params;
-    const { workspace_id } = req.params;
+    const { workspace_id, project_id } = req.params;
 
     try {
       const projectDelete = await ProjectService.delete(project_id, workspace_id);

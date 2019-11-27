@@ -10,18 +10,14 @@ class Session {
   login = async (req, res) => {
     try {
       await checkValidationErrors(req);
-      
-      const {
-        body: {
-          email,
-          password
-        },
-        connection: {
-          remoteAddress
-        }
-      } = req;
-      
-      const data = await AuthService.login(email, password, remoteAddress || 'Unknown');
+
+      const { body, connection } = req;
+
+      const data = await AuthService.login(
+        body.email,
+        body.password,
+        connection.remoteAddress || 'Unknown'
+      );
       
       return res.status(STATUS_CODES.CREATED).json({
         action: ACTION_CODES.AUTHORIZATION_TOKEN_CREATED,
@@ -36,11 +32,7 @@ class Session {
     try {
       await checkValidationErrors(req);
   
-      const {
-        refreshToken,
-      } = req.body;
-      
-      const data = await AuthService.refreshToken(refreshToken);
+      const data = await AuthService.refreshToken(req.body.refreshToken);
       
       return res.status(STATUS_CODES.CREATED).json({
         action: ACTION_CODES.AUTHORIZATION_TOKEN_REFRESHED,
@@ -51,19 +43,15 @@ class Session {
     }
   };
 
-  logout = (req, res) => {
-    const { sessionKey } = req.decoded;
-
-    AuthService.logout(sessionKey)
+  logout = (req, res) =>
+    AuthService.logout(req.decoded.sessionKey)
       .then(() => res.status(STATUS_CODES.NO_CONTENT).send())
       .catch(() => setResponseError(res));
-  };
 
-  logoutOfAllSessions = (req, res) => {
+  logoutOfAllSessions = (req, res) =>
     AuthService.logoutOfAllSessions(req.decoded.userId)
       .then(() => res.status(STATUS_CODES.NO_CONTENT).send())
       .catch(() => setResponseError(res))
-  }
 }
 
 export default new Session();

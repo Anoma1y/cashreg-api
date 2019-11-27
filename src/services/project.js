@@ -2,21 +2,40 @@ import DB from '../config/db';
 import { HttpError } from '../helpers/errorHandler';
 import STATUS_CODES from '../helpers/statusCodes';
 import ACTION_CODES from '../helpers/actionCodes';
+import TransactionService from './transaction';
 
 class Project {
-  getSingle = async (data, options = {}) => {
-    if (typeof data === 'object') {
-      return DB.Project.findOne({
-        where: {
-          ...data,
-        }, ...options
-      });
-    }
+  count = (where) => DB.Project.count({ where });
 
-    return DB.Project.findByPk(data, options);
-  };
+  getSingle = async (id, workspace_id, options = {}) => DB.Project.findOne({
+    where: {
+      id,
+      workspace_id,
+    },
+    attributes: {
+      exclude: ['contragent_id', 'workspace_id']
+    },
+    include: [{
+      model: DB.Contragent,
+      attributes: {
+        exclude: ['workspace_id']
+      }
+    }]
+  }, options);
 
-  getList = async (options = {}) => DB.Project.findAll(options);
+  getList = async (options = {}, expand = true) => DB.Project.findAll({
+    attributes: {
+      exclude: ['contragent_id', 'workspace_id']
+    },
+    include: [{
+      model: DB.Contragent,
+      attributes: {
+        exclude: ['workspace_id']
+      }
+    }],
+    json: true,
+    ...options,
+  });
 
   create = async (data) => {
     const { name, description, workspace_id, type, } = data;

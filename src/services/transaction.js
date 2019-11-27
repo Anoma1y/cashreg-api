@@ -54,6 +54,8 @@ class Transaction {
     }
   ];
 
+  count = (where) => DB.Transaction.count({ where });
+
   checkNegativeCash = async (data, reverse = false) => {
     const { workspace_id, currency_id, sum, type } = data;
 
@@ -77,12 +79,12 @@ class Transaction {
     });
   };
 
-  getList = async (options = {}) => {
+  getList = async (options = {}, expand = true) => {
     return DB.Transaction.findAll({
       attributes: {
         exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
       },
-      include: Transaction.TransactionInclude,
+      include: expand ? Transaction.TransactionInclude : [],
       json:true,
       ...options,
     })

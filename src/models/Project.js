@@ -93,10 +93,9 @@ export default (sequelize) => {
   const Project = sequelize.define("projects", attributes, options);
 
   Project.associate = (models) => {
-    // models.Project.belongsTo(models.Workspace, {
-    //   onDelete: 'CASCADE',
-    //   foreignKey: 'workspace_id'
-    // });
+    models.Project.belongsTo(models.Contragent, {
+      foreignKey: 'contragent_id'
+    });
 
     // models.Transaction.belongsTo(models.Project, {
     //   onDelete: 'CASCADE',

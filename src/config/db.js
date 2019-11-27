@@ -26,7 +26,7 @@ const sequelizeOptions = {
     idle: 10000
   },
 
-  logging: console.log,
+  logging: Config.debugSql ? console.log : false,
 
   define: {
     underscored: false,

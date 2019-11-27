@@ -10,6 +10,13 @@ import {
   setResponseErrorValidation,
   checkValidationErrors,
 } from "../helpers/errorHandler";
+import {
+  getMultipleQueryValues,
+  getMultipleWhere,
+  getDateWhere,
+  getWhere,
+  getMultipleOrder,
+} from '../helpers/sql';
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
 import { getPagination } from '../helpers/pagination';
@@ -17,6 +24,7 @@ import { removeEmpty } from '../helpers';
 import { validationResult } from 'express-validator/check';
 import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
+import StructuredDataService from '../services/structuredData';
 
 class Transaction {
   getTransactionList = async (req, res) => {
@@ -24,115 +32,27 @@ class Transaction {
       await checkValidationErrors(req);
       const { workspace_id } = req.params;
 
-      const {
-        register_date_start,
-        register_date_end,
-        sum_from,
-        sum_to,
-        currency_id,
-        category_id,
-        contragent_id,
-        project_id,
-        type,
-        order_by_direction = 'desc',
-        order_by_key = 'id',
-      } = req.query;
-
-      const where = removeEmpty({
-        category_id,
-        currency_id,
-        contragent_id,
-        workspace_id,
-        project_id,
-        type,
-      });
-
-      if (where.category_id && where.category_id.length > 1) {
-        where['category_id'] = {
-          [Op.in]: category_id.replace(/\s/g, '').split(',')
+      const where = getWhere(
+        req.query,
+        {
+          queryList: ['type', 'category_id', 'currency_id', 'contragent_id', 'project_id'],
+          maybeMultipleQuery: ['category_id', 'currency_id', 'contragent_id', 'project_id'],
+          valFromTo: [
+            { key: 'sum', from: 'sum_from', to: 'sum_to' },
+            { key: 'registered_at', from: 'register_date_start', to: 'register_date_end', factor: 1000 },
+          ],
         }
-      }
+      );
 
-      if (where.currency_id && where.currency_id.length > 1) {
-        where['currency_id'] = {
-          [Op.in]: currency_id.replace(/\s/g, '').split(',')
-        }
-      }
-
-      if (where.contragent_id && where.contragent_id.length > 1) {
-        where['contragent_id'] = {
-          [Op.in]: contragent_id.replace(/\s/g, '').split(',')
-        }
-      }
-
-      if (where.project_id && where.project_id.length > 1) {
-        where['project_id'] = {
-          [Op.in]: project_id.replace(/\s/g, '').split(',')
-        }
-      }
+      where['workspace_id'] = workspace_id;
 
       where['invalidated_at'] = {
         [Op.eq]: null,
       };
 
-      if (sum_from && sum_to) {
-        where['sum'] = {
-          [Op.gte]: sum_from,
-          [Op.lte]: sum_to,
-        };
-      } else if (sum_from && !sum_to) {
-        where['sum'] = {
-          [Op.gte]: sum_from,
-        }
-      } else if (!sum_from && sum_to) {
-        where['sum'] = {
-          [Op.lte]: sum_to,
-        }
-      }
+      const data = await StructuredDataService.withPagination(req, where, TransactionService.count, TransactionService.getList);
 
-      if (register_date_start && register_date_end) { // todo need fix timezone
-        where['registered_at'] = {
-          [Op.gte]: register_date_start * 1000,
-          [Op.lte]: register_date_end * 1000,
-        };
-      } else if (register_date_start && !register_date_end) {
-        where['registered_at'] = {
-          [Op.gte]: register_date_start * 1000,
-        }
-      } else if (!register_date_start && register_date_end) {
-        where['registered_at'] = {
-          [Op.lte]: register_date_end * 1000,
-        }
-      }
-
-      const order = [[order_by_key, order_by_direction]]; // todo add array
-
-      const total_records = await DB.Transaction.count({ where });
-
-      const { page, num_on_page, offset, limit } = getPagination(req, total_records);
-
-      if (total_records === 0) {
-        return res.status(STATUS_CODES.OK).json({
-          page: 1,
-          data: [],
-          num_on_page,
-          total_records
-        });
-      }
-
-      const data = await TransactionService.getList({
-        offset,
-        limit,
-        where,
-        order,
-      });
-
-      return res.status(STATUS_CODES.OK).json({
-        page,
-        data,
-        num_on_page,
-        total_records
-      });
+      return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
       return setResponseError(res, err);
     }

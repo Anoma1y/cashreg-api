@@ -10,11 +10,18 @@ export const attributes = {
   },
   workspace_id: {
     type: Sequelize.INTEGER,
-    onDelete: "CASCADE",
     allowNull: false,
     references: {
       model: "workspaces",
       key: "id"
+    },
+  },
+  parent_id: {
+    type: Sequelize.INTEGER,
+    allowNull: true,
+    references: {
+      model: "categories",
+      key: "id",
     },
   },
   name: {

@@ -56,7 +56,6 @@ class Permissions extends BitwisePermissions {
     }
 
     const userWorkspace = await WorkspaceService.getUserWorkspace({ user_id, workspace_id });
-
     if (userWorkspace) {
       try {
         await Permissions.setCache(workspace_id, user_id, userWorkspace.permissions);
