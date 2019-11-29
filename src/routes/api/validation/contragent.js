@@ -1,12 +1,16 @@
 import ACTION_CODES from "../../../helpers/actionCodes";
 import { check } from 'express-validator';
-import { checkTransactionType } from './utils';
+import { checkContragentType } from './utils';
 
 const createContragent = [
   check('title', ACTION_CODES.EMPTY_FIELD_TITLE)
     .exists()
     .trim()
     .isLength({ min: 1, max: 255 }),
+  check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
+    .exists()
+    .isNumeric()
+		.custom(checkContragentType),
   check('longTitle', ACTION_CODES.EMPTY_FIELD_LONG_TITLE)
     .optional()
     .trim()
@@ -37,6 +41,10 @@ const editContragent = [
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
+  check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
+    .exists()
+    .isNumeric()
+		.custom(checkContragentType),
   check('longTitle', ACTION_CODES.EMPTY_FIELD_LONG_TITLE)
     .optional()
     .trim()

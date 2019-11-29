@@ -3,18 +3,20 @@ import {
   checkValidationErrors,
 } from "../helpers/errorHandler";
 import { removeEmpty } from '../helpers';
+import { getWhere } from '../helpers/sql';
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
 import ContragentService from '../services/contragent';
+import StructuredDataService from '../services/structuredData';
 
 class Contragent {
-  static ContragentData = (req) => ({
-    workspace_id: req.params.workspace_id,
+  static ContragentData = (req) => removeEmpty({
     title: req.body.title,
     longTitle: req.body.longTitle,
     description: req.body.description,
     inn: req.body.inn,
     kpp: req.body.kpp,
+    type: req.body.type,
     payment_info: req.body.payment_info,
     active: req.body.active,
   });
@@ -25,22 +27,17 @@ class Contragent {
 
       const { workspace_id } = req.params;
 
-      const {
-        order_by_direction = 'desc',
-        order_by_key = 'id',
-      } = req.query;
+      const where = getWhere(
+        req.query,
+        {
+          queryList: ['type', 'active', 'search'],
+          maybeMultipleQuery: ['type'],
+        }
+      );
 
-      const where = removeEmpty({
-        workspace_id,
-      });
+      where['workspace_id'] = workspace_id;
 
-      const order = [[order_by_key, order_by_direction]]; // todo add array
-
-      const data = await ContragentService.getList({
-        json: true,
-        where,
-        order,
-      });
+      const data = await StructuredDataService.withoutPagination(req, where, ContragentService.getList);
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
@@ -54,17 +51,13 @@ class Contragent {
 
       const { workspace_id, contragent_id } = req.params;
 
-      const contragent = await ContragentService.getSingle(contragent_id, { json: true, });
+      const data = await ContragentService.getSingle(contragent_id, workspace_id, { json: true, });
 
-      if (!contragent) {
+      if (!data) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
-      if (parseInt(contragent.workspace_id) !== parseInt(workspace_id)) {
-        return res.status(STATUS_CODES.FORBIDDEN).send();
-      }
-
-      return res.status(STATUS_CODES.OK).json(contragent);
+      return res.status(STATUS_CODES.OK).json(data);
 
     } catch (err) {
       return setResponseError(res, err)
@@ -75,11 +68,13 @@ class Contragent {
     try {
       await checkValidationErrors(req);
 
-      const createContragent = await ContragentService.create(Contragent.ContragentData(req));
+      const { workspace_id } = req.params;
+
+      const createData = await ContragentService.create(workspace_id, Contragent.ContragentData(req));
 
       return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.CONTRAGENT_CREATED,
-        data: createContragent
+        action: ACTION_CODES.CATEGORY_CREATED,
+        data: createData,
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -87,12 +82,12 @@ class Contragent {
   };
 
   deleteContragent = async (req, res) => {
-    const { workspace_id, contragent_id } = req.params;
-
     try {
-      const contragentDelete = await ContragentService.delete(contragent_id, workspace_id);
+      const { workspace_id, contragent_id } = req.params;
 
-      if (contragentDelete === 0) {
+      const deleteData = await ContragentService.delete(contragent_id, workspace_id);
+
+      if (deleteData === 0) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
@@ -105,8 +100,9 @@ class Contragent {
   editContragent = async (req, res) => {
     try {
       await checkValidationErrors(req);
+      const { workspace_id, contragent_id } = req.params;
 
-      const data = await ContragentService.edit(req.params.contragent_id, Contragent.ContragentData(req));
+      const data = await ContragentService.edit(contragent_id, workspace_id, Contragent.ContragentData(req));
 
       return res.status(STATUS_CODES.OK).json(data)
     } catch (err) {

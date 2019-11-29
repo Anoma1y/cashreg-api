@@ -3,16 +3,30 @@ import { getMultipleQueryValues, getMultipleOrder } from '../helpers/sql';
 import STATUS_CODES from '../helpers/statusCodes';
 
 class StructuredData {
-	withPagination = async (req, where, countServiceMethod, listServiceMethod) => {
+	getOrder = (req) => {
 		const {
 			order_by_key = 'id',
 			order_by_direction = 'desc',
 		} = req.query;
 
-		const order = getMultipleOrder(
+		return getMultipleOrder(
 			getMultipleQueryValues(order_by_key),
 			getMultipleQueryValues(order_by_direction)
 		);
+	};
+
+	withoutPagination = async (req, where, listServiceMethod) => {
+		const order = this.getOrder(req);
+
+		return listServiceMethod({
+			json: true,
+			where,
+			order,
+		});
+	};
+
+	withPagination = async (req, where, countServiceMethod, listServiceMethod) => {
+		const order = this.getOrder(req);
 
 		const total_records = await countServiceMethod(where);
 

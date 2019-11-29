@@ -20,5 +20,5 @@ export default {
   DIGITAL_OCEAN_SPACES_ENDPOINT: process.env.DIGITAL_OCEAN_SPACES_ENDPOINT,
 
   debug: true, // todo add check development/production env
-  debugSql: false,
+  debugSql: true,
 };

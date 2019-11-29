@@ -12,6 +12,14 @@ export const checkTransactionType = type => {
 	throw new Error(ACTION_CODES.WRONG_TRANSACTION_TYPE)
 };
 
+export const checkContragentType = type => {
+	if (Object.keys(Schema.contragentType).includes(String(type))) {
+		return true;
+	}
+
+	throw new Error(ACTION_CODES.WRONG_CONTRAGENT_TYPE)
+};
+
 export const aboveZero = val => val > 0;
 
 export const arrayOfNumbers = arr => arr.every(it => Number.isInteger(it));

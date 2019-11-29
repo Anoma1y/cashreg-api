@@ -13,7 +13,7 @@ class Project {
       workspace_id,
     },
     attributes: {
-      exclude: ['contragent_id', 'workspace_id']
+      exclude: ['contragent_id']
     },
     include: [{
       model: DB.Contragent,
@@ -29,94 +29,52 @@ class Project {
     },
     include: [{
       model: DB.Contragent,
-      attributes: {
-        exclude: ['workspace_id']
-      }
+      attributes: ['id', 'title', 'type', 'active']
     }],
     json: true,
     ...options,
   });
 
-  create = async (data) => {
-    const { name, description, workspace_id, type, } = data;
+  create = async (workspace_id, data) => {
+    const actualData = await DB.Project.findOne({ where: { name } });
 
-    try {
-      const project = await DB.Project.findOne({ where: { name } });
-
-      if (project) {
-        throw {
-          action: ACTION_CODES.USER_ALREADY_EXISTS,
-          status: STATUS_CODES.CONFLICT,
-        };
-      }
-
-      return DB.Project.create({
-        name,
-        description,
-        workspace_id,
-        type,
-      });
-    } catch (e) {
-      throw new HttpError(e.action, e.status);
+    if (actualData) {
+      throw new HttpError(ACTION_CODES.USER_ALREADY_EXISTS, STATUS_CODES.CONFLICT);
     }
+
+    return DB.Project.create({ workspace_id, ...data });
   };
 
   delete = async (project_id, workspace_id) => {
-    const project = await this.getSingle(project_id);
+    const actualData = await this.getSingle(project_id, workspace_id);
 
-    if (!project) {
-      throw {
-        action: ACTION_CODES.CATEGORY_NOT_FOUND,
-        status: STATUS_CODES.NOT_FOUND,
-      };
+    if (!actualData) {
+      throw new HttpError(ACTION_CODES.PROJECT_NOT_FOUND, STATUS_CODES.NOT_FOUND);
     }
 
-    if (parseInt(project.workspace_id) !== parseInt(workspace_id)) {
-      throw {
-        action: ACTION_CODES.UNKNOWN_ERROR,
-        status: STATUS_CODES.FORBIDDEN,
-      };
+    if (parseInt(actualData.workspace_id) !== parseInt(workspace_id)) {
+      throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
     }
 
     return DB.Project.destroy({ where: { id: project_id } });
   };
 
-  edit = async (project_id, data) => {
-    const { name, description, workspace_id, type, } = data;
+  edit = async (id, workspace_id, data) => {
+    const project = await this.getSingle(id, workspace_id);
 
-    try {
-      const project = await this.getSingle(project_id);
-
-      if (!project) {
-        throw {
-          action: ACTION_CODES.CATEGORY_NOT_FOUND,
-          status: STATUS_CODES.NOT_FOUND,
-        };
-      }
-
-      if (parseInt(project.workspace_id) !== parseInt(workspace_id)) {
-        throw {
-          action: ACTION_CODES.UNKNOWN_ERROR,
-          status: STATUS_CODES.FORBIDDEN,
-        };
-      }
-
-      if (name) {
-        project['name'] = name;
-      }
-
-      if (description) {
-        project['description'] = description;
-      }
-
-      if (type) {
-        project['type'] = type;
-      }
-
-      return project.save();
-    } catch (e) {
-      throw new HttpError(e.action, e.status);
+    if (!project) {
+      throw new HttpError(ACTION_CODES.PROJECT_NOT_FOUND, STATUS_CODES.NOT_FOUND);
     }
+
+    if (parseInt(project.workspace_id) !== parseInt(workspace_id)) {
+      throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
+    }
+
+    Object.keys(data).forEach(key => {
+      project.set(key, data[key]);
+    });
+
+    return project.save();
   };
 }
 

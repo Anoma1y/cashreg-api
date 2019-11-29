@@ -4,7 +4,7 @@ import { checkToken } from '../../../middlewares/jwt';
 import Permissions from '../../../middlewares/permissions';
 import Validation from '../validation/workspace';
 import CategoryRouter from './category';
-import ContragentRouter from './category';
+import ContragentRouter from './contragent';
 import ProjectRouter from './project';
 import TransactionRouter from './transaction';
 import CashRouter from './cash';

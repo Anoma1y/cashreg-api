@@ -2,6 +2,7 @@ import {
   setResponseError,
   checkValidationErrors,
 } from "../helpers/errorHandler";
+import { removeEmpty } from '../helpers';
 import { getWhere } from '../helpers/sql';
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
@@ -9,10 +10,14 @@ import ProjectService from '../services/project';
 import StructuredDataService from '../services/structuredData';
 
 class Project {
-  static ProjectData = (req) => ({
-    workspace_id: req.params.workspace_id,
-    name: req.body.name,
+  static ProjectData = (req) => removeEmpty({
+    title: req.body.title,
     description: req.body.description,
+    contragent_id: req.body.contragent_id,
+    start_date: req.body.start_date,
+    end_date: req.body.end_date,
+    finished_at: req.body.finished_at,
+    archived_at: req.body.archived_at,
     type: req.body.type,
   });
 
@@ -32,7 +37,7 @@ class Project {
 
       where['workspace_id'] = workspace_id;
 
-      const data = await StructuredDataService.withPagination(req, where, ProjectService.count, ProjectService.getList);
+      const data = await StructuredDataService.withoutPagination(req, where, ProjectService.getList);
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
@@ -47,13 +52,13 @@ class Project {
 
       const { workspace_id, project_id } = req.params;
 
-      const project = await ProjectService.getSingle(project_id, workspace_id, { json: true, });
+      const data = await ProjectService.getSingle(project_id, workspace_id, { json: true, });
 
-      if (!project) {
+      if (!data) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.OK).json(project);
+      return res.status(STATUS_CODES.OK).json(data);
 
     } catch (err) {
       return setResponseError(res, err)
@@ -64,11 +69,12 @@ class Project {
     try {
       await checkValidationErrors(req);
 
-      const createProject = await ProjectService.create(Project.ProjectData(req));
+      const { workspace_id } = req.params;
+      const createData = await ProjectService.create(workspace_id, Project.ProjectData(req));
 
       return res.status(STATUS_CODES.CREATED).json({
         action: ACTION_CODES.CATEGORY_CREATED,
-        data: createProject,
+        data: createData,
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -76,12 +82,12 @@ class Project {
   };
 
   deleteProject = async (req, res) => {
-    const { workspace_id, project_id } = req.params;
-
     try {
-      const projectDelete = await ProjectService.delete(project_id, workspace_id);
+      const { workspace_id, project_id } = req.params;
 
-      if (projectDelete === 0) {
+      const deleteData = await ProjectService.delete(project_id, workspace_id);
+
+      if (deleteData === 0) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
@@ -94,8 +100,9 @@ class Project {
   editProject = async (req, res) => {
     try {
       await checkValidationErrors(req);
+      const { workspace_id, project_id } = req.params;
 
-      const data = await ProjectService.edit(req.params.project_id, Project.ProjectData(req));
+      const data = await ProjectService.edit(project_id, workspace_id, Project.ProjectData(req));
 
       return res.status(STATUS_CODES.OK).json(data)
     } catch (err) {
