@@ -7,6 +7,9 @@ const createCategory = [
     .exists()
     .trim()
     .isLength({ min: 1, max: 255 }),
+  check('name', ACTION_CODES.EMPTY_FIELD_NAME)
+    .optional()
+    .isNumeric(),
   check('description', ACTION_CODES.EMPTY_FIELD_DESCRIPTION)
     .optional()
     .trim()
@@ -22,6 +25,9 @@ const editCategory = [
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
+  check('name', ACTION_CODES.EMPTY_FIELD_NAME)
+    .optional()
+    .isNumeric(),
   check('description', ACTION_CODES.EMPTY_FIELD_DESCRIPTION)
     .optional()
     .trim()

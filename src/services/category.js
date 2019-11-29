@@ -4,19 +4,36 @@ import STATUS_CODES from '../helpers/statusCodes';
 import ACTION_CODES from '../helpers/actionCodes';
 
 class Category {
-  getSingle = async (data, options = {}) => {
-    if (typeof data === 'object') {
-      return DB.Category.findOne({
-        where: {
-          ...data,
-        }, ...options
-      });
-    }
+  count = (where) => DB.Category.count({ where });
 
-    return DB.Category.findByPk(data, options);
-  };
+  getSingle = async (id, workspace_id, options = {}) => await DB.Category.findOne({
+    where: {
+      id,
+      workspace_id,
+    },
+    include: [{
+      model: DB.Category,
+      as: 'children',
+      attributes: {
+        exclude: ['type', 'workspace_id', 'parent_id'],
+      }
+    }],
+  }, options);
 
-  getList = async (options = {}) => DB.Category.findAll(options);
+  getList = async (options = {}) => DB.Category.findAll({
+    attributes: {
+      exclude: ['workspace_id', 'parent_id'],
+    },
+    include: [{
+      model: DB.Category,
+      as: 'children',
+      attributes: {
+        exclude: ['type', 'workspace_id', 'parent_id'],
+      }
+    }],
+    json: true,
+    ...options,
+  });
 
   create = async (data) => {
     const { name, description, workspace_id, type, } = data;

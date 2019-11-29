@@ -1,17 +1,20 @@
+import { Op } from 'sequelize';
 import {
   setResponseError,
   checkValidationErrors,
 } from "../helpers/errorHandler";
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
+import { getWhere } from '../helpers/sql';
 import { removeEmpty } from '../helpers';
 import CategoryService from '../services/category';
+import StructuredDataService from '../services/structuredData';
 
 class Category {
-  static CategoryData = (req) => ({
-    workspace_id: req.params.workspace_id,
+  static CategoryData = (req) => removeEmpty({
     name: req.body.name,
     description: req.body.description,
+    parent_id: req.body.description,
     type: req.body.type,
   });
 
@@ -21,24 +24,23 @@ class Category {
 
       const { workspace_id } = req.params;
 
-      const {
-        type,
-        order_by_direction = 'desc',
-        order_by_key = 'id',
-      } = req.query;
+      const where = getWhere(
+        req.query,
+        {
+          queryList: ['type', 'search'],
+          maybeMultipleQuery: ['type'],
+        }
+      );
 
-      const where = removeEmpty({
-        type,
-        workspace_id,
-      });
+      if (req.query.parent_id) {
+        where['id'] = req.query.parent_id;
+      } else {
+        where['parent_id'] = null;
+      }
 
-      const order = [[order_by_key, order_by_direction]]; // todo add array
+      where['workspace_id'] = workspace_id;
 
-      const data = await CategoryService.getList({
-        json: true,
-        where,
-        order,
-      });
+      const data = await StructuredDataService.withoutPagination(req, where, CategoryService.getList);
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
@@ -51,19 +53,17 @@ class Category {
       await checkValidationErrors(req);
 
       const { workspace_id, category_id } = req.params;
-      const category = await CategoryService.getSingle(category_id, { json: true, });
 
-      if (!category) {
+      const data = await CategoryService.getSingle(category_id, workspace_id, { json: true, });
+
+      if (!data) {
         return res.status(STATUS_CODES.NOT_FOUND).send();
       }
 
-      if (parseInt(category.workspace_id) !== parseInt(workspace_id)) {
-        return res.status(STATUS_CODES.FORBIDDEN).send();
-      }
-
-      return res.status(STATUS_CODES.OK).json(category);
+      return res.status(STATUS_CODES.OK).json(data);
 
     } catch (err) {
+      console.log(err)
       return setResponseError(res, err)
     }
   };
