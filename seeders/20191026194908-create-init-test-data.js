@@ -76,25 +76,68 @@ module.exports = {
     });
 
     for (const workspace of workspaces) {
+      const categoryOutcome = await DB.Category.create({
+        workspace_id: workspace.id,
+        name: 'Налоги',
+        type: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      const categoryIncome = await DB.Category.create({
+        workspace_id: workspace.id,
+        name: 'Продажа товаров',
+        type: 2,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
       await queryInterface.bulkInsert('categories', [
         {
           workspace_id: workspace.id,
-          name: 'Оплата налогов',
+          name: 'Налоги/ФНС',
           type: 1,
+          parent_id: categoryOutcome.id,
           created_at: new Date(),
           updated_at: new Date(),
         },
         {
           workspace_id: workspace.id,
-          name: 'Оплата аренды',
+          name: 'Налоги/ФСС',
           type: 1,
+          parent_id: categoryOutcome.id,
           created_at: new Date(),
           updated_at: new Date(),
         },
         {
           workspace_id: workspace.id,
-          name: 'Возврат долга',
+          name: 'Налоги/ПФР',
+          type: 1,
+          parent_id: categoryOutcome.id,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          workspace_id: workspace.id,
+          name: 'Продажа дилдаков',
           type: 2,
+          parent_id: categoryIncome.id,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          workspace_id: workspace.id,
+          name: 'Продажа услуг по разработке сайта',
+          type: 2,
+          parent_id: categoryIncome.id,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+        {
+          workspace_id: workspace.id,
+          name: 'Продажа девственности',
+          type: 2,
+          parent_id: categoryIncome.id,
           created_at: new Date(),
           updated_at: new Date(),
         }
