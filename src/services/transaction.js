@@ -3,6 +3,9 @@ import { HttpError } from '../helpers/errorHandler';
 import STATUS_CODES from '../helpers/statusCodes';
 import ACTION_CODES from '../helpers/actionCodes';
 import CashService from './cash';
+import CategoryService from './category';
+import ContragentService from './contragent';
+import ProjectService from './project';
 
 class Transaction {
   static TransactionInclude = [
@@ -56,10 +59,13 @@ class Transaction {
 
   count = (where) => DB.Transaction.count({ where });
 
-  checkNegativeCash = async (data, reverse = false) => {
-    const { workspace_id, currency_id, sum, type } = data;
+  checkNegativeCash = async (workspace_id, data, reverse = false) => {
+    const { currency_id, sum, type } = data;
+
+    if (!workspace_id || !currency_id || !sum || !type) return true;
 
     const cash = await CashService.getCash(workspace_id);
+
     const currentCash = cash.find(c => c.currency_id === currency_id);
 
     return type === (reverse ? 2 : 1) && (currentCash.sum - sum) < 0;
@@ -90,43 +96,58 @@ class Transaction {
     })
   };
 
-  createTransaction = async (data) => {
-    const {
-      data: {
-        type,
-        category_id,
-        currency_id,
-        contragent_id,
-        file_id,
-        registered_at,
-        sum,
-        comment,
-      },
-      workspace_id,
-      user_id,
-    } = data;
+  createTransaction = async (workspace_id, user_id, data, files) => {
+    const isNegative = await this.checkNegativeCash(workspace_id, data);
 
-    if (await this.checkNegativeCash(data)) {
-      throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.UNPROCESSABLE_ENTITY);
+    if (isNegative) {
+      throw new HttpError(ACTION_CODES.TRANSACTION_CASH_NEGATIVE, STATUS_CODES.UNPROCESSABLE_ENTITY);
+    }
+
+    if (data.category_id) {
+      const category = await CategoryService.getSingle(data.category_id,workspace_id, { attributes: ['id', 'type'] });
+
+      if (!category) {
+        throw new HttpError('CATEGORY_NOT_FOUND', 404);
+      }
+
+      if (category.type !== data.type) {
+        throw new HttpError('CATEGORY_TYPE_NOT_MATCH', 404);
+      }
+    }
+
+    if (data.contragent_id) {
+      const contragent = await ContragentService.getSingle(data.contragent_id,workspace_id, { attributes: ['id'] });
+
+      if (!contragent) {
+        throw new HttpError('CONTRAGENT_NOT_FOUND', 404);
+      }
+    }
+
+    if (data.project_id) {
+      const project = await ProjectService.getSingle(data.project_id,workspace_id, { attributes: ['id'] });
+
+      if (!project) {
+        throw new HttpError('PROJECT_NOT_FOUND', 404);
+      }
     }
 
     return await sequelize.transaction().then(async (transaction) => {
       try {
-
         const transactionCreate = await DB.Transaction.create(
           {
             user_id,
             workspace_id,
-            type,
-            category_id,
-            currency_id,
-            contragent_id,
-            registered_at,
-            sum,
-            comment,
+            type: data.type,
+            category_id: data.category_id,
+            currency_id: data.currency_id,
+            contragent_id: data.contragent_id,
+            registered_at: data.registered_at,
+            sum: data.sum,
+            comment: data.comment,
           },
           {transaction}
         );
+        const { file_id } = files;
 
         if (file_id && file_id.length !== 0) {
           await DB.TransactionFiles.bulkCreate(file_id.map(id => ({
@@ -138,7 +159,6 @@ class Transaction {
         }
 
         await transaction.commit();
-
         return transactionCreate;
       } catch (e) {
         await transaction.rollback().then(() => {

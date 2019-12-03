@@ -27,6 +27,21 @@ import CashService from '../services/cash';
 import StructuredDataService from '../services/structuredData';
 
 class Transaction {
+  static TransactionData = (req) => removeEmpty({
+    type: req.body.type,
+    sum: req.body.sum,
+    category_id: req.body.category_id,
+    currency_id: req.body.currency_id,
+    contragent_id: req.body.contragent_id,
+    project_id: req.body.project_id,
+    registered_at: req.body.registered_at,
+    comment: req.body.comment,
+  });
+
+  static TransactionFiles = (req) => removeEmpty({
+    file_id: req.body.file_id,
+  });
+
   getTransactionList = async (req, res) => {
     try {
       await checkValidationErrors(req);
@@ -88,11 +103,12 @@ class Transaction {
         }
       } = req;
 
-      const transactionCreate = await TransactionService.createTransaction({
-        data: req.body,
-        user_id,
+      const transactionCreate = await TransactionService.createTransaction(
         workspace_id,
-      });
+        user_id,
+        Transaction.TransactionData(req),
+        Transaction.TransactionFiles(req),
+      );
 
       const transaction = await TransactionService.getSingle(transactionCreate.id, workspace_id);
 
@@ -100,7 +116,7 @@ class Transaction {
 
       return res.status(STATUS_CODES.CREATED).json(transaction);
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       return setResponseError(res, err)
     }
   };

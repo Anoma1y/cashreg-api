@@ -46,7 +46,7 @@ export const attributes = {
 	},
 	category_id: {
 		type: Sequelize.INTEGER,
-		allowNull: false,
+		allowNull: true,
 		references: {
 			model: "categories",
 			key: "id"
