@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import DB from '../config/db';
-import { redisGetAsync, redisSetAsync } from '../config/redis';
+import { redisGetAsync, redisSetAsync, redisDelAsync } from '../config/redis';
 import { HttpError } from '../helpers/errorHandler';
 import { removeEmpty } from '../helpers';
 import STATUS_CODES from '../helpers/statusCodes';
@@ -19,6 +19,10 @@ const getRawWhereIn = (field, arr, separate = true) => { // todo go to utils
 const getRawWhere = (field, val, separate = true) => val ? `${separate ? 'and ' : ''}${field} = ${val}` : ''; // todo go to utils
 
 class Cash {
+	invalidateCache = async (workspace_id) => {
+		return redisDelAsync(`cash:${workspace_id}`);
+	};
+
 	getCash = async (workspace_id, query = {}) => {
 		const {
 			date_from,

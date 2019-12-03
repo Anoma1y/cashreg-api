@@ -43,11 +43,11 @@ export const attributes = {
     type: Sequelize.INTEGER,
   },
   inn: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.STRING(20),
   },
   kpp: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.STRING(50),
   },
   created_at: {

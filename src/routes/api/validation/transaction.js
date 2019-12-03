@@ -23,11 +23,11 @@ const createTransaction = [
 		.isArray()
 		.custom(arrayOfNumbers)
 		.withMessage('Array file_id should contain only numbers'),
-	check('category_id')
-		.exists()
-		.isNumeric(),
 	check('currency_id')
 		.exists()
+		.isNumeric(),
+	check('category_id')
+		.optional()
 		.isNumeric(),
 	check('contragent_id')
 		.optional()
