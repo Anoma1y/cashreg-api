@@ -1,8 +1,6 @@
 import STATUS_CODES from './statusCodes';
 import ACTION_CODES from "./actionCodes";
-import {
-  validationResult
-} from 'express-validator/check';
+import { validationResult } from 'express-validator';
 
 export class HttpError extends Error {
   constructor(action = ACTION_CODES.UNKNOWN_ERROR, status = STATUS_CODES.INTERNAL_SERVER_ERROR, extra = {}) {
