@@ -34,6 +34,8 @@ class Project {
 
       const { workspace_id } = req.params;
 
+      const { status, start_date, end_date } = req.query;
+
       const where = getWhere(
         req.query,
         {
@@ -43,11 +45,11 @@ class Project {
         }
       );
 
-      const startDate = req.query.start_date * 1000;
-      const endDate = req.query.end_date * 1000;
+      const startDate = start_date * 1000;
+      const endDate = end_date * 1000;
 
-      if (req.query.status) {
-        switch (parseInt(req.query.status)) {
+      if (status) {
+        switch (parseInt(status)) {
           case PROJECT_STATUS.ALL:
             break;
           case PROJECT_STATUS.ACTIVE:
@@ -66,7 +68,7 @@ class Project {
         }
       }
 
-      if (req.query.start_date && req.query.end_date) {
+      if (start_date && end_date) {
         where[Op.and] = [
           {
             start_date: {
@@ -77,14 +79,14 @@ class Project {
             }
           }
         ]
-      } else if (req.query.start_date && !req.query.end_date) {
+      } else if (start_date && !end_date) {
         where['start_date'] = {
           [Op.or]: {
             [Op.gte]: startDate,
             [Op.eq]: null
           }
         }
-      } else if (!req.query.start_date && req.query.end_date) {
+      } else if (!start_date && end_date) {
         where['end_date'] = {
           [Op.or]: {
             [Op.lte]: endDate,
@@ -107,9 +109,7 @@ class Project {
     try {
       await checkValidationErrors(req);
 
-      const { workspace_id, project_id } = req.params;
-
-      const data = await ProjectService.getSingle(project_id, workspace_id, { json: true, });
+      const data = await ProjectService.getSingle(req.params.project_id, req.params.workspace_id, { json: true, });
 
       if (!data) {
         return res.status(STATUS_CODES.NOT_FOUND).send();

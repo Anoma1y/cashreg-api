@@ -42,8 +42,10 @@ export const getWhere = (query, opt = {}) => {
 
 	if (search.length !== 0) {
 		search.forEach(searchItem => {
-			where[searchItem.key] = {
-				[Op.iLike]: `%${query[searchItem.queryKey].toLowerCase()}%`,
+			if (query[searchItem.queryKey]) {
+				where[searchItem.key] = {
+					[Op.iLike]: `%${query[searchItem.queryKey].toLowerCase()}%`,
+				}
 			}
 		})
 	}
