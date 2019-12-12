@@ -29,3 +29,5 @@ export const getPagination = (req, total_records) => {
 		limit,
 	}
 };
+
+export const hasPagination = (req) => !!req.query.page;
