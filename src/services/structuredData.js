@@ -1,4 +1,4 @@
-import { getPagination } from '../helpers/pagination';
+import { getPagination, hasPagination } from '../helpers/pagination';
 import { getMultipleQueryValues, getMultipleOrder } from '../helpers/sql';
 import STATUS_CODES from '../helpers/statusCodes';
 
@@ -29,6 +29,10 @@ class StructuredData {
 		const order = this.getOrder(req);
 
 		const total_records = await countServiceMethod(where);
+
+		if (!hasPagination(req)) {
+			return this.withoutPagination(req, where, listServiceMethod);
+		}
 
 		const { page, num_on_page, offset, limit } = getPagination(req, total_records);
 
