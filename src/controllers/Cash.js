@@ -15,7 +15,7 @@ import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
 import { getPagination } from '../helpers/pagination';
 import { removeEmpty } from '../helpers';
-import { validationResult } from 'express-validator/check';
+import { validationResult } from 'express-validator';
 import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
 import uuid from 'uuid/v4';

@@ -33,7 +33,7 @@ export const attributes = {
     allowNull: true,
   },
   start_date: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.DATE,
     defaultValue: null,
     get() {
@@ -41,7 +41,7 @@ export const attributes = {
     },
   },
   end_date: {
-    allowNull: false,
+    allowNull: true,
     type: Sequelize.DATE,
     defaultValue: null,
     get() {

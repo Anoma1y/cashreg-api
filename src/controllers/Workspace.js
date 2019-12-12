@@ -8,7 +8,7 @@ import {
 } from "../helpers/errorHandler";
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
-import { validationResult } from 'express-validator/check';
+import { validationResult } from 'express-validator';
 import WorkspaceService from '../services/workspace';
 import PermissionService from '../services/permission';
 

@@ -2,7 +2,7 @@ import DB from '../config/db';
 import { errorFormatter, HttpError, setResponseError, setResponseErrorValidation } from "../helpers/errorHandler";
 import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
-import { validationResult } from 'express-validator/check';
+import { validationResult } from 'express-validator';
 import Permissions from '../helpers/permissions';
 
 class Permission {
