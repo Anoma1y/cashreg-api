@@ -14,9 +14,10 @@ export const getMultipleOrder = (by_key, by_direct) => by_key.map((key, i) => ([
 
 export const getWhere = (query, opt = {}) => {
 	const {
-		queryList = [],
-		maybeMultipleQuery = [],
-		valFromTo = [],
+		search = [], // поиск по строке object[]: @key - столбец, @queryKey - query ключ
+		queryList = [], // query string[], которые будут добавлены в условие
+		maybeMultipleQuery = [], // query string[], которые могут иметь массив значений (через запятую)
+		valFromTo = [], // поиск от-до, object[]: @key - столбец, @from, @to, @factor - умножение на число
 	} = opt;
 
 	const initWhere = {};
@@ -37,6 +38,14 @@ export const getWhere = (query, opt = {}) => {
 				}
 			}
 		});
+	}
+
+	if (search.length !== 0) {
+		search.forEach(searchItem => {
+			where[searchItem.key] = {
+				[Op.iLike]: `%${query[searchItem.queryKey].toLowerCase()}%`,
+			}
+		})
 	}
 
 	if (valFromTo.length !== 0) {
