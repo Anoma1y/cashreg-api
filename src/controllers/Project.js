@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import {
   setResponseError,
   checkValidationErrors,
@@ -8,6 +9,12 @@ import ACTION_CODES from "../helpers/actionCodes";
 import STATUS_CODES from '../helpers/statusCodes';
 import ProjectService from '../services/project';
 import StructuredDataService from '../services/structuredData';
+
+const PROJECT_STATUS = {
+  ALL: 0,
+  ACTIVE: 1,
+  ARCHIVE: 2,
+};
 
 class Project {
   static ProjectData = (req) => removeEmpty({
@@ -32,8 +39,59 @@ class Project {
         {
           queryList: ['type', 'contragent_id'],
           maybeMultipleQuery: ['contragent_id'],
+          search: [{ key: 'title', queryKey: 'search' }],
         }
       );
+
+      const startDate = req.query.start_date * 1000;
+      const endDate = req.query.end_date * 1000;
+
+      if (req.query.status) {
+        switch (parseInt(req.query.status)) {
+          case PROJECT_STATUS.ALL:
+            break;
+          case PROJECT_STATUS.ACTIVE:
+            where[Op.and] = [
+              { finished_at: { [Op.eq]: null } },
+              { archived_at: { [Op.eq]: null } },
+            ];
+            break;
+          case PROJECT_STATUS.ARCHIVE:
+            where['archived_at'] = {
+              [Op.ne]: null
+            };
+            break;
+          default:
+            break;
+        }
+      }
+
+      if (req.query.start_date && req.query.end_date) {
+        where[Op.and] = [
+          {
+            start_date: {
+              [Op.between]: [startDate, endDate]
+            },
+            end_date: {
+              [Op.between]: [startDate, endDate]
+            }
+          }
+        ]
+      } else if (req.query.start_date && !req.query.end_date) {
+        where['start_date'] = {
+          [Op.or]: {
+            [Op.gte]: startDate,
+            [Op.eq]: null
+          }
+        }
+      } else if (!req.query.start_date && req.query.end_date) {
+        where['end_date'] = {
+          [Op.or]: {
+            [Op.lte]: endDate,
+            [Op.eq]: null
+          }
+        }
+      }
 
       where['workspace_id'] = workspace_id;
 
@@ -41,7 +99,6 @@ class Project {
 
       return res.status(STATUS_CODES.OK).json(data);
     } catch (err) {
-      console.log(err)
       return setResponseError(res, err);
     }
   };
