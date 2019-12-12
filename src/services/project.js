@@ -56,6 +56,14 @@ class Project {
       throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
     }
 
+    const hasTransaction = await TransactionService.count({
+      project_id,
+    });
+
+    if (hasTransaction) {
+      throw new HttpError(ACTION_CODES.CANNOT_BE_DELETED, STATUS_CODES.CONFLICT);
+    }
+
     return DB.Project.destroy({ where: { id: project_id } });
   };
 

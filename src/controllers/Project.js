@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import db from '../config/db';
 import {
   setResponseError,
   checkValidationErrors,
@@ -25,7 +26,6 @@ class Project {
     end_date: req.body.end_date,
     finished_at: req.body.finished_at,
     archived_at: req.body.archived_at,
-    type: req.body.type,
   });
 
   getProjectList = async (req, res) => {
@@ -37,7 +37,7 @@ class Project {
       const where = getWhere(
         req.query,
         {
-          queryList: ['type', 'contragent_id'],
+          queryList: ['contragent_id'],
           maybeMultipleQuery: ['contragent_id'],
           search: [{ key: 'title', queryKey: 'search' }],
         }
