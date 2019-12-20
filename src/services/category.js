@@ -1,7 +1,6 @@
 import DB from '../config/db';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HttpError } from '../services/errors';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class Category {
   count = (where) => DB.Category.count({ where });
@@ -43,8 +42,8 @@ class Category {
 
       if (category) {
         throw {
-          action: ACTION_CODES.USER_ALREADY_EXISTS,
-          status: STATUS_CODES.CONFLICT,
+          action: ACTION_CODE.USER_ALREADY_EXISTS,
+          status: HTTP_STATUS.CONFLICT,
         };
       }
 
@@ -64,15 +63,15 @@ class Category {
 
     if (!category) {
       throw {
-        action: ACTION_CODES.CATEGORY_NOT_FOUND,
-        status: STATUS_CODES.NOT_FOUND,
+        action: ACTION_CODE.CATEGORY_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND,
       };
     }
 
     if (parseInt(category.workspace_id) !== parseInt(workspace_id)) {
       throw {
-        action: ACTION_CODES.UNKNOWN_ERROR,
-        status: STATUS_CODES.FORBIDDEN,
+        action: ACTION_CODE.UNKNOWN_ERROR,
+        status: HTTP_STATUS.FORBIDDEN,
       };
     }
 
@@ -87,15 +86,15 @@ class Category {
 
       if (!category) {
         throw {
-          action: ACTION_CODES.CATEGORY_NOT_FOUND,
-          status: STATUS_CODES.NOT_FOUND,
+          action: ACTION_CODE.CATEGORY_NOT_FOUND,
+          status: HTTP_STATUS.NOT_FOUND,
         };
       }
 
       if (parseInt(category.workspace_id) !== parseInt(workspace_id)) {
         throw {
-          action: ACTION_CODES.UNKNOWN_ERROR,
-          status: STATUS_CODES.FORBIDDEN,
+          action: ACTION_CODE.UNKNOWN_ERROR,
+          status: HTTP_STATUS.FORBIDDEN,
         };
       }
 

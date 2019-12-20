@@ -1,18 +1,18 @@
-import ACTION_CODES from "../../../helpers/actionCodes";
+import { ACTION_CODE } from "../../../constants";
 import { check } from 'express-validator';
 
 const login = [
-  check('email', ACTION_CODES.EMPTY_FIELD_EMAIL)
+  check('email', ACTION_CODE.EMPTY_FIELD_EMAIL)
     .exists()
     .trim()
     .isEmail()
     .normalizeEmail()
-    .withMessage(ACTION_CODES.EMAIL_VALIDATION),
-  check('password', ACTION_CODES.EMPTY_FIELD_PASSWORD)
+    .withMessage(ACTION_CODE.EMAIL_VALIDATION),
+  check('password', ACTION_CODE.EMPTY_FIELD_PASSWORD)
     .exists()
     .trim()
     .isLength({ min: 6, max: 36 })
-    .withMessage(ACTION_CODES.PASSWORD_VALUE_INVALID)
+    .withMessage(ACTION_CODE.PASSWORD_VALUE_INVALID)
 ];
 
 const refreshToken = [

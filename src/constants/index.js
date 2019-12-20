@@ -1,13 +1,21 @@
-export const ACTION_CODES_EXPIRES = {
+import ACTION_CODE from './actionCodes';
+import HTTP_STATUS from './statusCodes';
+
+export const ACTION_CODE_EXPIRES = {
 	EMAIL_VERIFICATION: 60 * 60 * 24,
 	PASSWORD_RESET: 60 * 60 * 24,
 	WORKSPACE_INVITE: 60 * 60 * 24,
 };
 
-export const ACTION_CODES_TYPES = {
+export const ACTION_CODE_TYPES = {
 	UNDEFINED: 0,
 	EMAIL_VERIFICATION: 1,
 	PASSWORD_RESET: 2,
 	EMAIL_CHANGE: 3,
 	WORKSPACE_INVITE: 4,
 };
+
+export {
+	ACTION_CODE,
+	HTTP_STATUS,
+}

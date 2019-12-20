@@ -6,11 +6,9 @@ import {
 } from '../helpers/index';
 import DB from '../config/db';
 import { redisDelAsync } from '../config/redis';
-import STATUS_CODES from '../helpers/statusCodes';
-import { HttpError } from "../helpers/errorHandler";
-import ACTION_CODES from '../helpers/actionCodes';
+import { ACTION_CODE_TYPES, ACTION_CODE_EXPIRES, HTTP_STATUS, ACTION_CODE } from '../constants';
+import { HttpError } from "../services/errors";
 import { Op } from 'sequelize';
-import { ACTION_CODES_TYPES, ACTION_CODES_EXPIRES } from '../config/constants'
 import AuthService from './auth';
 
 class PasswordService {
@@ -18,7 +16,7 @@ class PasswordService {
     const user = await DB.User.findOne({ where: { email } });
 
     if (!user) {
-      throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     const code = generateCode();
@@ -26,8 +24,8 @@ class PasswordService {
     await DB.ActionCodes.create({
       user_id: user.id,
       code,
-      type: ACTION_CODES_TYPES.PASSWORD_RESET,
-      expires_at: addTimestamp(ACTION_CODES_EXPIRES.PASSWORD_RESET, true)
+      type: ACTION_CODE_TYPES.PASSWORD_RESET,
+      expires_at: addTimestamp(ACTION_CODE_EXPIRES.PASSWORD_RESET, true)
     });
 
     console.log(code);
@@ -37,18 +35,18 @@ class PasswordService {
 
   resetPasswordStepTwo = async (userId, token, tokenId, password) => {
     if (!token || !tokenId) {
-      throw new HttpError(ACTION_CODES.AUTHORIZATION_TOKEN_NOT_FOUND, STATUS_CODES.UNPROCESSABLE_ENTITY);
+      throw new HttpError(ACTION_CODE.AUTHORIZATION_TOKEN_NOT_FOUND, HTTP_STATUS.UNPROCESSABLE_ENTITY);
     }
 
     const user = await DB.User.findByPk(userId);
     if (!user) {
-      throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     const actionCode = await DB.ActionCodes.findOne({
       where: {
         id: tokenId,
-        type: ACTION_CODES_TYPES.PASSWORD_RESET,
+        type: ACTION_CODE_TYPES.PASSWORD_RESET,
         user_id: userId,
         code: token,
         claimed_at: null,
@@ -59,7 +57,7 @@ class PasswordService {
     });
 
     if (!actionCode) {
-      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.VERIFY_TOKEN_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     user.password = await hashPassword(password);
@@ -76,12 +74,12 @@ class PasswordService {
 
     const verify = await verifyPassword(currentPassword, user.password);
 
-    if (!verify) throw new HttpError(ACTION_CODES.INVALID_CURRENT_PASSWORD, STATUS_CODES.UNAUTHORIZED);
+    if (!verify) throw new HttpError(ACTION_CODE.INVALID_CURRENT_PASSWORD, HTTP_STATUS.UNAUTHORIZED);
 
     const oldPasswordMatch = await verifyPassword(newPassword, user.password);
 
     if (oldPasswordMatch) {
-      throw new HttpError(ACTION_CODES.PASSWORD_CHANGE_VALIDATION_OLD, STATUS_CODES.UNPROCESSABLE_ENTITY);
+      throw new HttpError(ACTION_CODE.PASSWORD_CHANGE_VALIDATION_OLD, HTTP_STATUS.UNPROCESSABLE_ENTITY);
     }
 
     user.password = await hashPassword(newPassword);

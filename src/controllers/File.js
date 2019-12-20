@@ -1,8 +1,10 @@
 import DB from '../config/db';
 import { Op } from 'sequelize';
-import ACTION_CODES from "../helpers/actionCodes";
-import { HttpError, setResponseError } from "../helpers/errorHandler";
-import STATUS_CODES from "../helpers/statusCodes";
+import {
+  HttpError,
+  setResponseError
+} from "../services/errors";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class File {
   uploadFile = async (req, res) => {
@@ -11,8 +13,8 @@ class File {
 
       if (!file) {
         return setResponseError(res, {
-          action: ACTION_CODES.FILE_UPLOAD_NOT_FOUND,
-          status: STATUS_CODES.UNPROCESSABLE_ENTITY,
+          action: ACTION_CODE.FILE_UPLOAD_NOT_FOUND,
+          status: HTTP_STATUS.UNPROCESSABLE_ENTITY,
           extra: {}
         })
       }
@@ -42,7 +44,7 @@ class File {
 
       const createFile = await DB.File.create(fileData);
 
-      return res.status(STATUS_CODES.OK).json(createFile)
+      return res.status(HTTP_STATUS.OK).json(createFile)
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -55,10 +57,10 @@ class File {
       const file = await DB.File.findByPk(file_id);
 
       if (!file) {
-        throw new HttpError(ACTION_CODES.FILE_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+        throw new HttpError(ACTION_CODE.FILE_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
 
-      return res.status(STATUS_CODES.OK).json({
+      return res.status(HTTP_STATUS.OK).json({
         data: file
       })
     } catch (err) {
@@ -80,16 +82,16 @@ class File {
       };
 
       if (!condition) {
-        throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.UNPROCESSABLE_ENTITY);
+        throw new HttpError(ACTION_CODE.UNKNOWN_ERROR, HTTP_STATUS.UNPROCESSABLE_ENTITY);
       }
 
       const files = await DB.File.findAll({ ...condition });
 
       if (!files) {
-        throw new HttpError(ACTION_CODES.FILES_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+        throw new HttpError(ACTION_CODE.FILES_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
 
-      return res.status(STATUS_CODES.OK).json({
+      return res.status(HTTP_STATUS.OK).json({
         data: [...files]
       })
 
@@ -105,10 +107,10 @@ class File {
       const fileDelete = await DB.File.destroy({ where: { id: file_id } });
 
       if (fileDelete === 0) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.NO_CONTENT).send();
+      return res.status(HTTP_STATUS.NO_CONTENT).send();
     } catch (err) {
       return setResponseError(res, err);
     }

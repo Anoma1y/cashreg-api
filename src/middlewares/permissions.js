@@ -3,17 +3,16 @@ import {
   redisHgetAsync,
   redisDelAsync,
 } from '../config/redis';
-import ACTION_CODES from '../helpers/actionCodes';
-import STATUS_CODES from '../helpers/statusCodes'
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import BitwisePermissions from '../helpers/permissions';
 import WorkspaceService from '../services/workspace';
 
 class Permissions extends BitwisePermissions {
   static error = res =>
-    res.status(STATUS_CODES.FORBIDDEN).send();
+    res.status(HTTP_STATUS.FORBIDDEN).send();
 
   static workspaceIdMissing = res =>
-    res.status (STATUS_CODES.NOT_FOUND).json({ action: ACTION_CODES.EMPTY_PARAMS_WORKSPACE_ID });
+    res.status (HTTP_STATUS.NOT_FOUND).json({ action: ACTION_CODE.EMPTY_PARAMS_WORKSPACE_ID });
 
   static getCache = async (workspace_id, user_id) =>
     redisHgetAsync(`workspace-permissions:${workspace_id}`, user_id.toString());

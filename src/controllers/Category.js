@@ -1,10 +1,8 @@
-import { Op } from 'sequelize';
 import {
   setResponseError,
   checkValidationErrors,
-} from "../helpers/errorHandler";
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
+} from "../services/errors";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import { getWhere } from '../helpers/sql';
 import { removeEmpty } from '../helpers';
 import CategoryService from '../services/category';
@@ -42,7 +40,7 @@ class Category {
 
       const data = await StructuredDataService.withoutPagination(req, where, CategoryService.getList);
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -57,10 +55,10 @@ class Category {
       const data = await CategoryService.getSingle(category_id, workspace_id, { json: true, });
 
       if (!data) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
 
     } catch (err) {
       console.log(err)
@@ -74,8 +72,8 @@ class Category {
 
       const createCategory = await CategoryService.create(Category.CategoryData(req));
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.CATEGORY_CREATED,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.CATEGORY_CREATED,
         data: createCategory,
       });
     } catch (err) {
@@ -91,10 +89,10 @@ class Category {
       const categoryDelete = await CategoryService.delete(category_id, workspace_id);
 
       if (categoryDelete === 0) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.NO_CONTENT).json();
+      return res.status(HTTP_STATUS.NO_CONTENT).json();
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -106,7 +104,7 @@ class Category {
 
       const data = await CategoryService.edit(req.params.category_id, Category.CategoryData(req));
 
-      return res.status(STATUS_CODES.OK).json(data)
+      return res.status(HTTP_STATUS.OK).json(data)
     } catch (err) {
       return setResponseError(res, err);
     }

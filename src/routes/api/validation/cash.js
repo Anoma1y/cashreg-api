@@ -1,4 +1,4 @@
-import ACTION_CODES from "../../../helpers/actionCodes";
+import { ACTION_CODE } from '../../../constants';
 import { query } from 'express-validator';
 
 const validateQueryArray = val => {
@@ -8,16 +8,16 @@ const validateQueryArray = val => {
 };
 
 const getCash = [
-	query('currency_id', ACTION_CODES.EMPTY_FIELD_CURRENCY_ID)
+	query('currency_id', ACTION_CODE.EMPTY_FIELD_CURRENCY_ID)
 		.optional()
 		.custom(validateQueryArray),
-	query('contragent_id', ACTION_CODES.EMPTY_FIELD_CONTRAGENT_ID)
+	query('contragent_id', ACTION_CODE.EMPTY_FIELD_CONTRAGENT_ID)
 		.optional()
 		.custom(validateQueryArray),
-	query('category_id', ACTION_CODES.EMPTY_FIELD_CATEGORY_ID)
+	query('category_id', ACTION_CODE.EMPTY_FIELD_CATEGORY_ID)
 		.optional()
 		.custom(validateQueryArray),
-	query('type', ACTION_CODES.EMPTY_FIELD_TYPE)
+	query('type', ACTION_CODE.EMPTY_FIELD_TYPE)
 		.optional()
 		.isNumeric(),
 ];

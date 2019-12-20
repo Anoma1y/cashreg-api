@@ -1,4 +1,3 @@
-import Sequelize from 'sequelize';
 import DB from "../config/db";
 import { 
   redisDelAsync, 
@@ -7,16 +6,14 @@ import {
   redisHsetAsync, 
   redisKeysAsync,
   redisHgetAsync,
-  redisGetAsync,
 } from "../config/redis";
-import STATUS_CODES from "../helpers/statusCodes";
-import { HttpError } from "../helpers/errorHandler";
+import { HttpError } from "../services/errors";
 import { generateJWT } from "../helpers/jwt";
 import {
   getCurrentTimestamp,
   verifyPassword
 } from "../helpers/index";
-import ACTION_CODES from "../helpers/actionCodes";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import jwt from 'jsonwebtoken';
 import { raffinierenToken } from '../helpers/jwt';
 
@@ -49,9 +46,9 @@ class AuthService {
     const user = await this.checkUserAndVerify(email);
 
     if (!user) {
-      throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     } else if (!user.profile.is_email_verified) {
-      throw new HttpError(ACTION_CODES.ACTIVATION_REQUIRED, STATUS_CODES.IM_A_TEAPOT);
+      throw new HttpError(ACTION_CODE.ACTIVATION_REQUIRED, HTTP_STATUS.IM_A_TEAPOT);
     }
 
     const loginAttemptKey = `login-attempts:${user.id}`;
@@ -75,7 +72,7 @@ class AuthService {
         const totalSeconds = (minutes * 60) + seconds;
 
         if (attempts >= ATTEMPTS_TO_BAN) {
-          throw new HttpError(ACTION_CODES.USER_BANNED, STATUS_CODES.FORBIDDEN, { ban_period: totalSeconds });
+          throw new HttpError(ACTION_CODE.USER_BANNED, HTTP_STATUS.FORBIDDEN, { ban_period: totalSeconds });
         }
       }
     }
@@ -99,7 +96,7 @@ class AuthService {
         await redisHincrbyAsync(loginAttemptKey, 'attempts', 1)
       }
 
-      throw new HttpError(ACTION_CODES.INVALID_LOGIN_OR_PASS, STATUS_CODES.UNAUTHORIZED);
+      throw new HttpError(ACTION_CODE.INVALID_LOGIN_OR_PASS, HTTP_STATUS.UNAUTHORIZED);
     }
   };
 
@@ -114,7 +111,7 @@ class AuthService {
 
       return await this.genAuthToken(decode.userId, decode.sessionKey);
     } catch (e) {
-      throw new HttpError(ACTION_CODES.AUTHORIZATION_TOKEN_NOT_CORRECT, STATUS_CODES.FORBIDDEN)
+      throw new HttpError(ACTION_CODE.AUTHORIZATION_TOKEN_NOT_CORRECT, HTTP_STATUS.FORBIDDEN)
     }
   };
 

@@ -1,7 +1,6 @@
 import DB from '../config/db';
-import { errorFormatter, HttpError, setResponseError, setResponseErrorValidation } from "../helpers/errorHandler";
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
+import { errorFormatter, HttpError, setResponseError, setResponseErrorValidation } from "../services/errors";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import { validationResult } from 'express-validator';
 
 class Me {
@@ -32,29 +31,27 @@ class Me {
       });
 
       if (!user) {
-        throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND)
+        throw new HttpError(ACTION_CODE.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
       }
 
-      res.status(STATUS_CODES.OK).json({
+      res.status(HTTP_STATUS.OK).json({
         ...user.toJSON(),
       });
     } catch (e) {
       setResponseError(res, {
-        action: ACTION_CODES.UNKNOWN_ERROR,
-        status: STATUS_CODES.INTERNAL_SERVER_ERROR
+        action: ACTION_CODE.UNKNOWN_ERROR,
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR
       });
     }
   };
 
   changeMe = async (req, res) => {
-    const { userId } = req.decoded;
-
     const errors = validationResult(req).formatWith(errorFormatter);
 
     if (!errors.isEmpty()) {
       return setResponseErrorValidation(res, {
         errors: errors.array({ onlyFirstError: true }),
-        status: STATUS_CODES.UNPROCESSABLE_ENTITY
+        status: HTTP_STATUS.UNPROCESSABLE_ENTITY
       })
     }
     console.log(req.body)

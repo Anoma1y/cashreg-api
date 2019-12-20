@@ -1,7 +1,6 @@
 import DB from '../config/db';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HttpError } from '../services/errors';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class Contragent {
   count = (where) => DB.Contragent.count({ where });
@@ -25,7 +24,7 @@ class Contragent {
     const actualData = await DB.Contragent.findOne({ where: { title: data.title } });
 
     if (actualData) {
-      throw new HttpError(ACTION_CODES.USER_ALREADY_EXISTS, STATUS_CODES.CONFLICT);
+      throw new HttpError(ACTION_CODE.USER_ALREADY_EXISTS, HTTP_STATUS.CONFLICT);
     }
 
     return DB.Contragent.create({ workspace_id, ...data });
@@ -35,11 +34,11 @@ class Contragent {
     const actualData = await this.getSingle(contragent_id, workspace_id);
 
     if (!actualData) {
-      throw new HttpError(ACTION_CODES.PROJECT_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     if (parseInt(actualData.workspace_id) !== parseInt(workspace_id)) {
-      throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
+      throw new HttpError(ACTION_CODE.UNKNOWN_ERROR, HTTP_STATUS.FORBIDDEN);
     }
 
     return DB.Contragent.destroy({ where: { id: contragent_id } });
@@ -49,11 +48,11 @@ class Contragent {
     const editData = await this.getSingle(id, workspace_id);
 
     if (!editData) {
-      throw new HttpError(ACTION_CODES.PROJECT_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     if (parseInt(editData.workspace_id) !== parseInt(workspace_id)) {
-      throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
+      throw new HttpError(ACTION_CODE.UNKNOWN_ERROR, HTTP_STATUS.FORBIDDEN);
     }
 
     Object.keys(data).forEach(key => {

@@ -1,5 +1,5 @@
 import Schema from '../../../data/schema';
-import ACTION_CODES from '../../../helpers/actionCodes';
+import { ACTION_CODE } from '../../../constants';
 import Validator from 'validator';
 
 export const editCustomValidate = value => value === null || Validator.isLength(value, { min: 1, max: 255 });
@@ -9,7 +9,7 @@ export const checkTransactionType = type => {
 		return true;
 	}
 
-	throw new Error(ACTION_CODES.WRONG_TRANSACTION_TYPE)
+	throw new Error(ACTION_CODE.WRONG_TRANSACTION_TYPE)
 };
 
 export const checkContragentType = type => {
@@ -17,7 +17,7 @@ export const checkContragentType = type => {
 		return true;
 	}
 
-	throw new Error(ACTION_CODES.WRONG_CONTRAGENT_TYPE)
+	throw new Error(ACTION_CODE.WRONG_CONTRAGENT_TYPE)
 };
 
 export const aboveZero = val => val > 0;

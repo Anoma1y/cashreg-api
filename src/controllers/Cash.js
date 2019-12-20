@@ -1,24 +1,11 @@
-import { Op } from 'sequelize';
-import DB from '../config/db';
+import { redisSetAsync } from '../config/redis';
 import {
-  redisSetAsync,
-  redisGetAsync,
-} from '../config/redis';
-import {
-  errorFormatter,
-  HttpError,
   setResponseError,
-  setResponseErrorValidation,
   checkValidationErrors,
-} from "../helpers/errorHandler";
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
-import { getPagination } from '../helpers/pagination';
+} from "../services/errors";
+import { HTTP_STATUS } from '../constants';
 import { removeEmpty } from '../helpers';
-import { validationResult } from 'express-validator';
-import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
-import uuid from 'uuid/v4';
 
 class Cash {
   getCash = async (req, res) => {
@@ -64,7 +51,7 @@ class Cash {
         }
       }
 
-      return res.status(STATUS_CODES.OK).json(cash);
+      return res.status(HTTP_STATUS.OK).json(cash);
     } catch (err) {
       return setResponseError(res, err)
     }

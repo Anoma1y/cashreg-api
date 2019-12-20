@@ -1,11 +1,11 @@
-import ACTION_CODES from "../../../helpers/actionCodes";
+import { ACTION_CODE } from "../../../constants";
 import { check } from 'express-validator';
 
 const userInvite = [
-  check('workspace_id', ACTION_CODES.EMPTY_FIELD_WORKSPACE_ID)
+  check('workspace_id', ACTION_CODE.EMPTY_FIELD_WORKSPACE_ID)
     .exists()
     .isNumeric(),
-  check('user_id', ACTION_CODES.EMPTY_FIELD_USER_ID)
+  check('user_id', ACTION_CODE.EMPTY_FIELD_USER_ID)
     .exists()
     .isNumeric(),
   check('permissions')
@@ -14,14 +14,14 @@ const userInvite = [
 ];
 
 const inviteConfirm = [
-  check('user_id', ACTION_CODES.EMPTY_FIELD_USER_ID)
+  check('user_id', ACTION_CODE.EMPTY_FIELD_USER_ID)
     .exists()
     .isNumeric(),
-  check('code', ACTION_CODES.EMPTY_FIELD_ACTION_CODE)
+  check('code', ACTION_CODE.EMPTY_FIELD_ACTION_CODE)
     .exists()
     .isLength({ min: 10, })
     .isString(),
-  check('code_id', ACTION_CODES.EMPTY_FIELD_ACTION_CODE_ID)
+  check('code_id', ACTION_CODE.EMPTY_FIELD_ACTION_CODE_ID)
     .exists()
     .isNumeric(),
 ];

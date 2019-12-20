@@ -1,4 +1,4 @@
-import ACTION_CODES from "../../../helpers/actionCodes";
+import { ACTION_CODE } from "../../../constants";
 import { check, param } from 'express-validator';
 import {
 	checkTransactionType,
@@ -10,15 +10,15 @@ const createTransaction = [
 	param('workspace_id')
 		.exists()
 		.isNumeric(),
-	check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
+	check('type', ACTION_CODE.EMPTY_FIELD_TYPE)
 		.exists()
 		.isNumeric()
 		.custom(checkTransactionType),
-	check('sum', ACTION_CODES.EMPTY_FIELD_SUM)
+	check('sum', ACTION_CODE.EMPTY_FIELD_SUM)
 		.exists()
 		.isNumeric()
 		.custom(aboveZero),
-	check('file_id', ACTION_CODES.EMPTY_FIELD_FILE_ID)
+	check('file_id', ACTION_CODE.EMPTY_FIELD_FILE_ID)
 		.optional()
 		.isArray()
 		.custom(arrayOfNumbers)
@@ -35,7 +35,7 @@ const createTransaction = [
 	check('registered_at')
 		.optional()
 		.isNumeric(),
-	check('comment', ACTION_CODES.EMPTY_FIELD_COMMENT)
+	check('comment', ACTION_CODE.EMPTY_FIELD_COMMENT)
 		.optional()
 		.isString()
 		.trim()

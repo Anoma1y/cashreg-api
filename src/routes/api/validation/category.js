@@ -1,38 +1,38 @@
-import ACTION_CODES from "../../../helpers/actionCodes";
+import { ACTION_CODE } from "../../../constants";
 import { check } from 'express-validator';
 import { checkTransactionType } from './utils';
 
 const createCategory = [
-  check('name', ACTION_CODES.EMPTY_FIELD_NAME)
+  check('name', ACTION_CODE.EMPTY_FIELD_NAME)
     .exists()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('name', ACTION_CODES.EMPTY_FIELD_NAME)
+  check('name', ACTION_CODE.EMPTY_FIELD_NAME)
     .optional()
     .isNumeric(),
-  check('description', ACTION_CODES.EMPTY_FIELD_DESCRIPTION)
+  check('description', ACTION_CODE.EMPTY_FIELD_DESCRIPTION)
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
+  check('type', ACTION_CODE.EMPTY_FIELD_TYPE)
     .exists()
     .custom(checkTransactionType)
     .isNumeric(),
 ];
 
 const editCategory = [
-  check('name', ACTION_CODES.EMPTY_FIELD_NAME)
+  check('name', ACTION_CODE.EMPTY_FIELD_NAME)
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('name', ACTION_CODES.EMPTY_FIELD_NAME)
+  check('name', ACTION_CODE.EMPTY_FIELD_NAME)
     .optional()
     .isNumeric(),
-  check('description', ACTION_CODES.EMPTY_FIELD_DESCRIPTION)
+  check('description', ACTION_CODE.EMPTY_FIELD_DESCRIPTION)
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('type', ACTION_CODES.EMPTY_FIELD_TYPE)
+  check('type', ACTION_CODE.EMPTY_FIELD_TYPE)
     .optional()
     .isNumeric()
     .custom(checkTransactionType),

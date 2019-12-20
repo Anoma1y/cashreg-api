@@ -1,11 +1,10 @@
 import DB from '../config/db';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HttpError } from './errors';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import TransactionService from './transaction';
 
 class Project {
-  count = (where) => DB.Project.count({ where });
+  count = async (where) => DB.Project.count({ where });
 
   getSingle = async (id, workspace_id, options = {}) => DB.Project.findOne({
     where: {
@@ -39,7 +38,7 @@ class Project {
     const actualData = await DB.Project.findOne({ where: { name } });
 
     if (actualData) {
-      throw new HttpError(ACTION_CODES.USER_ALREADY_EXISTS, STATUS_CODES.CONFLICT);
+      throw new HttpError(ACTION_CODE.USER_ALREADY_EXISTS, HTTP_STATUS.CONFLICT);
     }
 
     return DB.Project.create({ workspace_id, ...data });
@@ -49,11 +48,11 @@ class Project {
     const actualData = await this.getSingle(project_id, workspace_id);
 
     if (!actualData) {
-      throw new HttpError(ACTION_CODES.PROJECT_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     if (parseInt(actualData.workspace_id) !== parseInt(workspace_id)) {
-      throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
+      throw new HttpError(ACTION_CODE.UNKNOWN_ERROR, HTTP_STATUS.FORBIDDEN);
     }
 
     const hasTransaction = await TransactionService.count({
@@ -61,7 +60,7 @@ class Project {
     });
 
     if (hasTransaction) {
-      throw new HttpError(ACTION_CODES.CANNOT_BE_DELETED, STATUS_CODES.CONFLICT);
+      throw new HttpError(ACTION_CODE.CANNOT_BE_DELETED, HTTP_STATUS.CONFLICT);
     }
 
     return DB.Project.destroy({ where: { id: project_id } });
@@ -71,11 +70,11 @@ class Project {
     const project = await this.getSingle(id, workspace_id);
 
     if (!project) {
-      throw new HttpError(ACTION_CODES.PROJECT_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     if (parseInt(project.workspace_id) !== parseInt(workspace_id)) {
-      throw new HttpError(ACTION_CODES.UNKNOWN_ERROR, STATUS_CODES.FORBIDDEN);
+      throw new HttpError(ACTION_CODE.UNKNOWN_ERROR, HTTP_STATUS.FORBIDDEN);
     }
 
     Object.keys(data).forEach(key => {

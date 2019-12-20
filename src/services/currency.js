@@ -1,7 +1,5 @@
 import DB from '../config/db';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class Currency {
   getSingle = async (data, options = {}) => {
@@ -26,8 +24,8 @@ class Currency {
   //
   //     if (!category) {
   //       throw {
-  //         action: ACTION_CODES.CATEGORY_NOT_FOUND,
-  //         status: STATUS_CODES.NOT_FOUND,
+  //         action: ACTION_CODE.CATEGORY_NOT_FOUND,
+  //         status: HTTP_STATUS.NOT_FOUND,
   //       };
   //     }
   //

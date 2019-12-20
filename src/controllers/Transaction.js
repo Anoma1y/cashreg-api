@@ -1,27 +1,11 @@
 import { Op } from 'sequelize';
-import DB from '../config/db';
 import {
-  redisDelAsync,
-} from '../config/redis';
-import {
-  errorFormatter,
-  HttpError,
   setResponseError,
-  setResponseErrorValidation,
   checkValidationErrors,
-} from "../helpers/errorHandler";
-import {
-  getMultipleQueryValues,
-  getMultipleWhere,
-  getDateWhere,
-  getWhere,
-  getMultipleOrder,
-} from '../helpers/sql';
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
-import { getPagination } from '../helpers/pagination';
+} from "../services/errors";
+import { getWhere, } from '../helpers/sql';
+import { HTTP_STATUS } from '../constants';
 import { removeEmpty } from '../helpers';
-import { validationResult } from 'express-validator';
 import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
 import StructuredDataService from '../services/structuredData';
@@ -67,7 +51,7 @@ class Transaction {
 
       const data = await StructuredDataService.withPagination(req, where, TransactionService.count, TransactionService.getList);
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -81,10 +65,10 @@ class Transaction {
       const transaction = await TransactionService.getSingle(transaction_id, workspace_id);
 
       if (!transaction) {
-        return res.status(STATUS_CODES.NOT_FOUND).send()
+        return res.status(HTTP_STATUS.NOT_FOUND).send()
       }
 
-      return res.status(STATUS_CODES.OK).json(transaction);
+      return res.status(HTTP_STATUS.OK).json(transaction);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -114,7 +98,7 @@ class Transaction {
 
       // await redisDelAsync(`cash:${workspace_id}`);
 
-      return res.status(STATUS_CODES.CREATED).json(transaction);
+      return res.status(HTTP_STATUS.CREATED).json(transaction);
     } catch (err) {
       // console.log(err)
       return setResponseError(res, err)
@@ -145,7 +129,7 @@ class Transaction {
         comment,
       }));
 
-      return res.status(STATUS_CODES.OK).json(transaction);
+      return res.status(HTTP_STATUS.OK).json(transaction);
     } catch (err) {
       console.log(err)
       return setResponseError(res, err);
@@ -160,7 +144,7 @@ class Transaction {
 
       const transaction = await TransactionService.invalidate(transaction_id, workspace_id);
 
-      return res.status(STATUS_CODES.OK).json(transaction);
+      return res.status(HTTP_STATUS.OK).json(transaction);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -172,7 +156,7 @@ class Transaction {
         workspace_id: 1,
         user_id: req.decoded.userId,
       })
-      // return res.status(STATUS_CODES.OK).json({
+      // return res.status(HTTP_STATUS.OK).json({
       //   accrualAmount: 0,
       //   accrualCount: 0,
       //   accrualFullAmount: 0,

@@ -1,16 +1,9 @@
-import DB from '../config/db';
 import {
-  errorFormatter,
-  HttpError,
   setResponseError,
-  setResponseErrorValidation,
   checkValidationErrors,
-} from "../helpers/errorHandler";
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
-import { validationResult } from 'express-validator';
+} from "../services/errors";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import WorkspaceService from '../services/workspace';
-import PermissionService from '../services/permission';
 
 class Workspace {
   getSingleWorkspace = async (req, res) => {
@@ -29,7 +22,7 @@ class Workspace {
 
       const workspaces = await WorkspaceService.getWorkspaceList(user_id, { json: true });
 
-      return res.status(STATUS_CODES.OK).json(workspaces);
+      return res.status(HTTP_STATUS.OK).json(workspaces);
     } catch (err) {
       return setResponseError(res, err)
     }
@@ -45,8 +38,8 @@ class Workspace {
 
       await WorkspaceService.inviteUser(req.body);
 
-      return res.status(STATUS_CODES.OK).json({
-        action: ACTION_CODES.USER_INVITED,
+      return res.status(HTTP_STATUS.OK).json({
+        action: ACTION_CODE.USER_INVITED,
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -59,8 +52,8 @@ class Workspace {
 
       await WorkspaceService.confirmInvite(req.body);
 
-      return res.status(STATUS_CODES.OK).json({
-        action: ACTION_CODES.USER_INVITED,
+      return res.status(HTTP_STATUS.OK).json({
+        action: ACTION_CODE.USER_INVITED,
       });
     } catch (err) {
       return setResponseError(res, err)

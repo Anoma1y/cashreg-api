@@ -1,6 +1,5 @@
 import { getPagination, hasPagination } from '../helpers/pagination';
 import { getMultipleQueryValues, getMultipleOrder } from '../helpers/sql';
-import STATUS_CODES from '../helpers/statusCodes';
 
 class StructuredData {
 	getOrder = (req) => {

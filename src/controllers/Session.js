@@ -1,10 +1,9 @@
-import STATUS_CODES from "../helpers/statusCodes";
-import { 
+import {
   setResponseError, 
   checkValidationErrors,
-} from "../helpers/errorHandler";
+} from "../services/errors";
 import AuthService from '../services/auth';
-import ACTION_CODES from "../helpers/actionCodes";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class Session {
   login = async (req, res) => {
@@ -19,8 +18,8 @@ class Session {
         connection.remoteAddress || 'Unknown'
       );
       
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.AUTHORIZATION_TOKEN_CREATED,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.AUTHORIZATION_TOKEN_CREATED,
         data
       })
     } catch (err) {
@@ -34,8 +33,8 @@ class Session {
   
       const data = await AuthService.refreshToken(req.body.refreshToken);
       
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.AUTHORIZATION_TOKEN_REFRESHED,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.AUTHORIZATION_TOKEN_REFRESHED,
         data
       });
     } catch (err) {
@@ -45,12 +44,12 @@ class Session {
 
   logout = (req, res) =>
     AuthService.logout(req.decoded.sessionKey)
-      .then(() => res.status(STATUS_CODES.NO_CONTENT).send())
+      .then(() => res.status(HTTP_STATUS.NO_CONTENT).send())
       .catch(() => setResponseError(res));
 
   logoutOfAllSessions = (req, res) =>
     AuthService.logoutOfAllSessions(req.decoded.userId)
-      .then(() => res.status(STATUS_CODES.NO_CONTENT).send())
+      .then(() => res.status(HTTP_STATUS.NO_CONTENT).send())
       .catch(() => setResponseError(res))
 }
 

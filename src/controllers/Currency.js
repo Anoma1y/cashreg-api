@@ -1,21 +1,15 @@
-import DB from '../config/db';
 import {
-  errorFormatter,
-  HttpError,
   setResponseError,
-  setResponseErrorValidation,
   checkValidationErrors,
-} from "../helpers/errorHandler";
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
-import { validationResult } from 'express-validator';
+} from "../services/errors";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import CurrencyService from '../services/currency';
 
 class Currency {
   getCurrencyList = async (req, res) => {
     try {
       await checkValidationErrors(req);
-      // throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.CONFLICT)
+
       const data = await CurrencyService.getList({
         attributes: {
           exclude: [
@@ -26,7 +20,7 @@ class Currency {
         json:true,
       });
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -48,10 +42,10 @@ class Currency {
       });
 
       if (!currency) {
-        return res.status(STATUS_CODES.NOT_FOUND).send()
+        return res.status(HTTP_STATUS.NOT_FOUND).send()
       }
 
-      return res.status(STATUS_CODES.OK).json(currency);
+      return res.status(HTTP_STATUS.OK).json(currency);
 
     } catch (err) {
       return setResponseError(res, err)

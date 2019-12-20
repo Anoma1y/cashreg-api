@@ -5,11 +5,8 @@ import {
 	generateCode,
 	hashPassword,
 } from '../helpers/index';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
-import MailService from './mail';
-import { ACTION_CODES_EXPIRES, ACTION_CODES_TYPES } from '../config/constants';
+import { HttpError } from '../services/errors';
+import { ACTION_CODE_EXPIRES, ACTION_CODE_TYPES, HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class Workspace {
 	getWorkspaceList = async (user_id, opt = {}) => {
@@ -42,8 +39,8 @@ class Workspace {
 
 			if (!invitedUser) {
 				throw {
-					action: ACTION_CODES.USER_NOT_FOUND,
-					status: STATUS_CODES.NOT_FOUND,
+					action: ACTION_CODE.USER_NOT_FOUND,
+					status: HTTP_STATUS.NOT_FOUND,
 				}
 			}
 
@@ -51,13 +48,13 @@ class Workspace {
 
 			if (!invitedWorkspace) {
 				throw {
-					action: ACTION_CODES.WORKSPACE_NOT_FOUND,
-					status: STATUS_CODES.NOT_FOUND,
+					action: ACTION_CODE.WORKSPACE_NOT_FOUND,
+					status: HTTP_STATUS.NOT_FOUND,
 				}
 			} else if (invitedWorkspace.is_personal) {
 				throw {
-					action: ACTION_CODES.WORKSPACE_IS_PERSONAL,
-					status: STATUS_CODES.FORBIDDEN,
+					action: ACTION_CODE.WORKSPACE_IS_PERSONAL,
+					status: HTTP_STATUS.FORBIDDEN,
 				}
 			}
 
@@ -70,8 +67,8 @@ class Workspace {
 
 			if (invitedWorkspaceUsers) {
 				throw {
-					action: ACTION_CODES.USER_ALREADY_WORKSPACE_MEMBER,
-					status: STATUS_CODES.CONFLICT,
+					action: ACTION_CODE.USER_ALREADY_WORKSPACE_MEMBER,
+					status: HTTP_STATUS.CONFLICT,
 				}
 			}
 
@@ -82,8 +79,8 @@ class Workspace {
 					user_id: invitedUser.id,
 					code: activationCode,
 					extra_data: JSON.stringify({ permissions }),
-					type: ACTION_CODES_TYPES.WORKSPACE_INVITE,
-					expires_at: addTimestamp(ACTION_CODES_EXPIRES.EMAIL_VERIFICATION, true)
+					type: ACTION_CODE_TYPES.WORKSPACE_INVITE,
+					expires_at: addTimestamp(ACTION_CODE_EXPIRES.EMAIL_VERIFICATION, true)
 				},
 			);
 			// todo add send mail after success
@@ -114,7 +111,7 @@ class Workspace {
 		const actionCode = await DB.ActionCodes.findOne({
 			where: {
 				id: code_id,
-				type: ACTION_CODES_TYPES.WORKSPACE_INVITE,
+				type: ACTION_CODE_TYPES.WORKSPACE_INVITE,
 				user_id,
 				code,
 				claimed_at: null,
@@ -123,13 +120,13 @@ class Workspace {
 				}
 			}
 		}).catch(() => {
-			throw new HttpError(ACTION_CODES.VERIFY_TOKEN_EXPIRED, STATUS_CODES.UNPROCESSABLE_ENTITY);
+			throw new HttpError(ACTION_CODE.VERIFY_TOKEN_EXPIRED, HTTP_STATUS.UNPROCESSABLE_ENTITY);
 		});
 
 		const user = await DB.User.findByPk(user_id);
 
 		if (!user) {
-			throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+			throw new HttpError(ACTION_CODE.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
 		}
 
 		// const transaction = await sequelize.transaction();
@@ -144,7 +141,7 @@ class Workspace {
 		// 	await transaction.commit();
 		// } catch (e) {
 		// 	await transaction.rollback().then(() => {
-		// 		throw new HttpError('Err', STATUS_CODES.INTERNAL_SERVER_ERROR);
+		// 		throw new HttpError('Err', HTTP_STATUS.INTERNAL_SERVER_ERROR);
 		// 	});
 		// }
 	};

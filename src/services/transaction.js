@@ -1,7 +1,6 @@
 import DB, { sequelize } from '../config/db';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HttpError } from '../services/errors';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import CashService from './cash';
 import CategoryService from './category';
 import ContragentService from './contragent';
@@ -100,7 +99,7 @@ class Transaction {
     const isNegative = await this.checkNegativeCash(workspace_id, data);
 
     if (isNegative) {
-      throw new HttpError(ACTION_CODES.TRANSACTION_CASH_NEGATIVE, STATUS_CODES.UNPROCESSABLE_ENTITY);
+      throw new HttpError(ACTION_CODE.TRANSACTION_CASH_NEGATIVE, HTTP_STATUS.UNPROCESSABLE_ENTITY);
     }
 
     if (data.category_id) {
@@ -162,7 +161,7 @@ class Transaction {
         return transactionCreate;
       } catch (e) {
         await transaction.rollback().then(() => {
-          throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
+          throw new HttpError(ACTION_CODE.USER_CREATED_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
         });
       }
     });
@@ -172,11 +171,11 @@ class Transaction {
     const transaction = await this.getSingle(transaction_id);
 
     if (!transaction) {
-      throw new HttpError(ACTION_CODES.TRANSACTION_NOT_FOUND, STATUS_CODES.NOT_FOUND)
+      throw new HttpError(ACTION_CODE.TRANSACTION_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
     if (transaction.invalidated_at !== null) {
-      throw new HttpError(ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED, STATUS_CODES.FORBIDDEN)
+      throw new HttpError(ACTION_CODE.TRANSACTION_ALREADY_INVALIDATED, HTTP_STATUS.FORBIDDEN)
     }
 
     Object.keys(data).forEach(key => {
@@ -190,11 +189,11 @@ class Transaction {
     const transaction = await this.getSingle(id, workspace_id, false);
 
     if (!transaction) {
-      throw new HttpError(ACTION_CODES.TRANSACTION_NOT_FOUND, STATUS_CODES.NOT_FOUND)
+      throw new HttpError(ACTION_CODE.TRANSACTION_NOT_FOUND, HTTP_STATUS.NOT_FOUND)
     }
 
     if (transaction.invalidated_at !== null) {
-      throw new HttpError(ACTION_CODES.TRANSACTION_ALREADY_INVALIDATED, STATUS_CODES.CONFLICT)
+      throw new HttpError(ACTION_CODE.TRANSACTION_ALREADY_INVALIDATED, HTTP_STATUS.CONFLICT)
     }
 
     if (await this.checkNegativeCash({
@@ -204,7 +203,7 @@ class Transaction {
       sum: transaction.sum,
       type: transaction.type,
     }, true)) {
-      throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.UNPROCESSABLE_ENTITY);
+      throw new HttpError(ACTION_CODE.USER_CREATED_ERROR, HTTP_STATUS.UNPROCESSABLE_ENTITY);
     }
 
     transaction.invalidated_at = +new Date();

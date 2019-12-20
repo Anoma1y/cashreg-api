@@ -1,4 +1,4 @@
-import ACTION_CODES from "../../../helpers/actionCodes";
+import { ACTION_CODE } from "../../../constants";
 import { check } from 'express-validator';
 
 const fileUpload = [

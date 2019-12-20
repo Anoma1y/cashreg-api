@@ -1,7 +1,6 @@
 import DB from '../config/db';
-import { HttpError } from '../helpers/errorHandler';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HttpError } from '../services/errors';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class Permission {
 	checkPermission = async (user_id, permission) => {

@@ -1,9 +1,8 @@
-import STATUS_CODES from '../helpers/statusCodes';
 import {
   setResponseError,
   checkValidationErrors
-} from "../helpers/errorHandler";
-import ACTION_CODES from '../helpers/actionCodes';
+} from "../services/errors";
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import RegistrationService from '../services/registration';
 import PasswordService from '../services/password';
 import MailService from '../services/mail';
@@ -17,7 +16,7 @@ class User {
 
       const isExist = await RegistrationService.checkExist(email);
 
-      return res.status(isExist ? STATUS_CODES.CONFLICT : STATUS_CODES.OK).send()
+      return res.status(isExist ? HTTP_STATUS.CONFLICT : HTTP_STATUS.OK).send()
     } catch (err) {
       return setResponseError(res, err)
     }
@@ -39,8 +38,8 @@ class User {
         key: JSON.parse(actionCodeCreate.extra_data).activationKey
       });
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.USER_CREATED,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.USER_CREATED,
         id: userCreate.id,
         token_id: actionCodeCreate.id
       });
@@ -66,8 +65,8 @@ class User {
         key: JSON.parse(actionCodeCreate.extra_data).activationKey
       });
 
-      return res.status(STATUS_CODES.OK).json({
-        action: ACTION_CODES.EMAIL_SEND,
+      return res.status(HTTP_STATUS.OK).json({
+        action: ACTION_CODE.EMAIL_SEND,
         id: user.id,
         token_id: actionCodeCreate.id
       });
@@ -85,8 +84,8 @@ class User {
 
       await RegistrationService.verify(user_id, { token, token_id, key });
 
-      return res.status(STATUS_CODES.OK).json({
-        action: ACTION_CODES.VERIFY_SUCCESS
+      return res.status(HTTP_STATUS.OK).json({
+        action: ACTION_CODE.VERIFY_SUCCESS
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -101,8 +100,8 @@ class User {
 
       await PasswordService.resetPasswordStepOne(email);
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.PASSWORD_RESET_SEND_EMAIL
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.PASSWORD_RESET_SEND_EMAIL
       });
     } catch (err) {
       return setResponseError(res, err)
@@ -118,8 +117,8 @@ class User {
 
       await PasswordService.resetPasswordStepTwo(user_id, token, Number(token_id), password );
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.PASSWORD_RESET_SUCCESSFUL
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.PASSWORD_RESET_SUCCESSFUL
       })
     } catch (err) {
       return setResponseError(res, err)
@@ -135,8 +134,8 @@ class User {
 
       const data = await PasswordService.changePassword(sessionKey, userId,  newPassword, currentPassword );
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.PASSWORD_CHANGE_SUCCESSFUL,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.PASSWORD_CHANGE_SUCCESSFUL,
         data
       });
     } catch (err) {

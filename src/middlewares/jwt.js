@@ -1,9 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { redisHgetAsync } from '../config/redis';
-import { HttpError, setResponseError } from '../helpers/errorHandler';
+import { HttpError, setResponseError } from '../services/errors';
 import { raffinierenToken } from '../helpers/jwt';
-import STATUS_CODES from '../helpers/statusCodes';
-import ACTION_CODES from '../helpers/actionCodes';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 
 const TOKEN_PREFIX = 'Bearer ';
 
@@ -15,12 +14,12 @@ const checkToken = async (req, res, next) => {
       const token = raffinierenToken(authorization, TOKEN_PREFIX);
       const decode = jwt.decode(token);
 
-      if (!decode) throw new HttpError(ACTION_CODES.AUTHORIZATION_TOKEN_NOT_CORRECT, STATUS_CODES.FORBIDDEN);
+      if (!decode) throw new HttpError(ACTION_CODE.AUTHORIZATION_TOKEN_NOT_CORRECT, HTTP_STATUS.FORBIDDEN);
 
       const secret = await redisHgetAsync(decode.sessionKey, 'accessToken');
 
       jwt.verify(token, secret, (err, verifyDecoded) => {
-        if (err) throw new HttpError(ACTION_CODES.AUTHORIZATION_TOKEN_NOT_CORRECT, STATUS_CODES.FORBIDDEN);
+        if (err) throw new HttpError(ACTION_CODE.AUTHORIZATION_TOKEN_NOT_CORRECT, HTTP_STATUS.FORBIDDEN);
 
         if (verifyDecoded) {
           req.decoded = verifyDecoded;
@@ -32,8 +31,8 @@ const checkToken = async (req, res, next) => {
     }
   } else {
     setResponseError(res, {
-      action: ACTION_CODES.AUTHORIZATION_HEADER_NOT_PRESENT,
-      status: STATUS_CODES.UNAUTHORIZED,
+      action: ACTION_CODE.AUTHORIZATION_HEADER_NOT_PRESENT,
+      status: HTTP_STATUS.UNAUTHORIZED,
       extra: {}
     });
   }

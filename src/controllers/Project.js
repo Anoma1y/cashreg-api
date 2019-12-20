@@ -1,15 +1,13 @@
 import { Op } from 'sequelize';
-import db from '../config/db';
+import { removeEmpty } from '../helpers';
+import { getWhere } from '../helpers/sql';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
+import ProjectService from '../services/project';
+import StructuredDataService from '../services/structuredData';
 import {
   setResponseError,
   checkValidationErrors,
-} from "../helpers/errorHandler";
-import { removeEmpty } from '../helpers';
-import { getWhere } from '../helpers/sql';
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
-import ProjectService from '../services/project';
-import StructuredDataService from '../services/structuredData';
+} from "../services/errors";
 
 const PROJECT_STATUS = {
   ALL: 0,
@@ -33,8 +31,10 @@ class Project {
       await checkValidationErrors(req);
 
       const { workspace_id } = req.params;
-
       const { status, start_date, end_date } = req.query;
+
+      const startDate = start_date * 1000;
+      const endDate = end_date * 1000;
 
       const where = getWhere(
         req.query,
@@ -45,8 +45,7 @@ class Project {
         }
       );
 
-      const startDate = start_date * 1000;
-      const endDate = end_date * 1000;
+
 
       if (status) {
         switch (parseInt(status)) {
@@ -99,7 +98,7 @@ class Project {
 
       const data = await StructuredDataService.withoutPagination(req, where, ProjectService.getList);
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -112,10 +111,10 @@ class Project {
       const data = await ProjectService.getSingle(req.params.project_id, req.params.workspace_id, { json: true, });
 
       if (!data) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
 
     } catch (err) {
       return setResponseError(res, err)
@@ -129,8 +128,8 @@ class Project {
       const { workspace_id } = req.params;
       const createData = await ProjectService.create(workspace_id, Project.ProjectData(req));
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.CATEGORY_CREATED,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.CATEGORY_CREATED,
         data: createData,
       });
     } catch (err) {
@@ -145,10 +144,10 @@ class Project {
       const deleteData = await ProjectService.delete(project_id, workspace_id);
 
       if (deleteData === 0) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.NO_CONTENT).json();
+      return res.status(HTTP_STATUS.NO_CONTENT).json();
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -161,7 +160,7 @@ class Project {
 
       const data = await ProjectService.edit(project_id, workspace_id, Project.ProjectData(req));
 
-      return res.status(STATUS_CODES.OK).json(data)
+      return res.status(HTTP_STATUS.OK).json(data)
     } catch (err) {
       return setResponseError(res, err);
     }

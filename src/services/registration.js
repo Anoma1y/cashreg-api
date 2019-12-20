@@ -7,11 +7,8 @@ import {
   hashPassword,
   removeEmpty,
 } from '../helpers/index';
-import STATUS_CODES from '../helpers/statusCodes';
-import { HttpError } from "../helpers/errorHandler";
-import ACTION_CODES from '../helpers/actionCodes';
-import MailService from './mail';
-import { ACTION_CODES_TYPES, ACTION_CODES_EXPIRES } from '../config/constants'
+import { HttpError } from "../services/errors";
+import { ACTION_CODE_TYPES, ACTION_CODE_EXPIRES, HTTP_STATUS, ACTION_CODE } from '../constants';
 
 class RegistrationService {
 
@@ -26,7 +23,7 @@ class RegistrationService {
     const checkUser = await this.checkExist(email);
 
     if (checkUser) {
-      throw new HttpError(ACTION_CODES.USER_ALREADY_EXISTS, STATUS_CODES.CONFLICT);
+      throw new HttpError(ACTION_CODE.USER_ALREADY_EXISTS, HTTP_STATUS.CONFLICT);
     }
 
     const hash = await hashPassword(password);
@@ -64,8 +61,8 @@ class RegistrationService {
             user_id: userCreate.id,
             code: activationCode,
             extra_data: JSON.stringify({ activationKey }),
-            type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
-            expires_at: addTimestamp(ACTION_CODES_EXPIRES.EMAIL_VERIFICATION, true)
+            type: ACTION_CODE_TYPES.EMAIL_VERIFICATION,
+            expires_at: addTimestamp(ACTION_CODE_EXPIRES.EMAIL_VERIFICATION, true)
           },
           {transaction}
         );
@@ -75,7 +72,7 @@ class RegistrationService {
         return [userCreate, actionCode];
       } catch (e) {
         await transaction.rollback().then(() => {
-          throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
+          throw new HttpError(ACTION_CODE.USER_CREATED_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
         });
       }
     });
@@ -88,7 +85,7 @@ class RegistrationService {
       where: {
         id: token_id,
         user_id: userId,
-        type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
+        type: ACTION_CODE_TYPES.EMAIL_VERIFICATION,
         claimed_at: null,
         expires_at: {
           [Op.gt]: new Date()
@@ -97,7 +94,7 @@ class RegistrationService {
     });
 
     if (!actionCode) {
-      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.VERIFY_TOKEN_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     if (!token && key) {
@@ -105,22 +102,22 @@ class RegistrationService {
 
 
       if (parseInt(activationKey) !== parseInt(key)) {
-        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.FORBIDDEN);
+        throw new HttpError(ACTION_CODE.ACTIVATION_CODE_DOES_NOT_MATCH, HTTP_STATUS.FORBIDDEN);
       }
     } else if (token && !key) {
       if (token !== actionCode.code) {
-        throw new HttpError(ACTION_CODES.ACTIVATION_CODE_DOES_NOT_MATCH, STATUS_CODES.FORBIDDEN);
+        throw new HttpError(ACTION_CODE.ACTIVATION_CODE_DOES_NOT_MATCH, HTTP_STATUS.FORBIDDEN);
       }
     }
 
     const profile = await DB.Profile.findOne({ where: { user_id: userId } });
 
     if (!profile) {
-      throw new HttpError(ACTION_CODES.USER_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     if (profile.is_email_verified) {
-      throw new HttpError(ACTION_CODES.USER_EMAIL_ALREADY_VERIFIED, STATUS_CODES.CONFLICT);
+      throw new HttpError(ACTION_CODE.USER_EMAIL_ALREADY_VERIFIED, HTTP_STATUS.CONFLICT);
     }
 
     const transaction = await sequelize.transaction();
@@ -135,7 +132,7 @@ class RegistrationService {
       await transaction.commit();
     } catch (e) {
       await transaction.rollback().then(() => {
-        throw new HttpError('Err', STATUS_CODES.INTERNAL_SERVER_ERROR);
+        throw new HttpError('Err', HTTP_STATUS.INTERNAL_SERVER_ERROR);
       });
     }
 
@@ -147,7 +144,7 @@ class RegistrationService {
       where: {
         id: token_id,
         user_id,
-        type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
+        type: ACTION_CODE_TYPES.EMAIL_VERIFICATION,
         claimed_at: null,
         expires_at: {
           [Op.gt]: new Date()
@@ -156,7 +153,7 @@ class RegistrationService {
     });
 
     if (!actionCodeOld) {
-      throw new HttpError(ACTION_CODES.VERIFY_TOKEN_NOT_FOUND, STATUS_CODES.NOT_FOUND);
+      throw new HttpError(ACTION_CODE.VERIFY_TOKEN_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
     }
 
     const user = await DB.User.findByPk(user_id, {
@@ -174,8 +171,8 @@ class RegistrationService {
             user_id,
             code: activationCode,
             extra_data: JSON.stringify({ activationKey }),
-            type: ACTION_CODES_TYPES.EMAIL_VERIFICATION,
-            expires_at: addTimestamp(ACTION_CODES_EXPIRES.EMAIL_VERIFICATION, true)
+            type: ACTION_CODE_TYPES.EMAIL_VERIFICATION,
+            expires_at: addTimestamp(ACTION_CODE_EXPIRES.EMAIL_VERIFICATION, true)
           },
           {transaction}
         );
@@ -188,7 +185,7 @@ class RegistrationService {
         return [user, actionCode];
       } catch (e) {
         await transaction.rollback().then(() => {
-          throw new HttpError(ACTION_CODES.USER_CREATED_ERROR, STATUS_CODES.INTERNAL_SERVER_ERROR);
+          throw new HttpError(ACTION_CODE.USER_CREATED_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR);
         });
       }
     });

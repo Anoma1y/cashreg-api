@@ -1,11 +1,10 @@
 import {
   setResponseError,
   checkValidationErrors,
-} from "../helpers/errorHandler";
+} from "../services/errors";
 import { removeEmpty } from '../helpers';
 import { getWhere } from '../helpers/sql';
-import ACTION_CODES from "../helpers/actionCodes";
-import STATUS_CODES from '../helpers/statusCodes';
+import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import ContragentService from '../services/contragent';
 import StructuredDataService from '../services/structuredData';
 
@@ -39,7 +38,7 @@ class Contragent {
 
       const data = await StructuredDataService.withoutPagination(req, where, ContragentService.getList);
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -54,10 +53,10 @@ class Contragent {
       const data = await ContragentService.getSingle(contragent_id, workspace_id, { json: true, });
 
       if (!data) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.OK).json(data);
+      return res.status(HTTP_STATUS.OK).json(data);
 
     } catch (err) {
       return setResponseError(res, err)
@@ -72,8 +71,8 @@ class Contragent {
 
       const createData = await ContragentService.create(workspace_id, Contragent.ContragentData(req));
 
-      return res.status(STATUS_CODES.CREATED).json({
-        action: ACTION_CODES.CATEGORY_CREATED,
+      return res.status(HTTP_STATUS.CREATED).json({
+        action: ACTION_CODE.CATEGORY_CREATED,
         data: createData,
       });
     } catch (err) {
@@ -88,10 +87,10 @@ class Contragent {
       const deleteData = await ContragentService.delete(contragent_id, workspace_id);
 
       if (deleteData === 0) {
-        return res.status(STATUS_CODES.NOT_FOUND).send();
+        return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
-      return res.status(STATUS_CODES.NO_CONTENT).json();
+      return res.status(HTTP_STATUS.NO_CONTENT).json();
     } catch (err) {
       return setResponseError(res, err);
     }
@@ -104,7 +103,7 @@ class Contragent {
 
       const data = await ContragentService.edit(contragent_id, workspace_id, Contragent.ContragentData(req));
 
-      return res.status(STATUS_CODES.OK).json(data)
+      return res.status(HTTP_STATUS.OK).json(data)
     } catch (err) {
       return setResponseError(res, err);
     }
