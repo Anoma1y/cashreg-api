@@ -23,8 +23,11 @@ export const setResponseError = (res, err = 'Server Error') => {
 	if (typeof err === 'object' && err.action && err.status) {
 		const objectPayload = {
 			action: err.action,
-			extra: err.extra
 		};
+
+		if (err.extra) {
+			objectPayload['extra'] = err.extra;
+		}
 
 		return res.status(err.status).json(objectPayload);
 	} else {

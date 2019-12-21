@@ -12,7 +12,7 @@ class Category {
   static CategoryData = (req) => removeEmpty({
     name: req.body.name,
     description: req.body.description,
-    parent_id: req.body.description,
+    parent_id: req.body.parent_id,
     type: req.body.type,
   });
 
@@ -70,7 +70,8 @@ class Category {
     try {
       await checkValidationErrors(req);
 
-      const createCategory = await CategoryService.create(Category.CategoryData(req));
+      const { workspace_id } = req.params;
+      const createCategory = await CategoryService.create(workspace_id, Category.CategoryData(req));
 
       return res.status(HTTP_STATUS.CREATED).json({
         action: ACTION_CODE.CATEGORY_CREATED,
@@ -82,13 +83,12 @@ class Category {
   };
 
   deleteCategory = async (req, res) => {
-    const { category_id } = req.params;
-    const { workspace_id } = req.params;
-
     try {
-      const categoryDelete = await CategoryService.delete(category_id, workspace_id);
+      const { workspace_id, category_id } = req.params;
 
-      if (categoryDelete === 0) {
+      const deleteData = await CategoryService.delete(category_id, workspace_id);
+
+      if (deleteData === 0) {
         return res.status(HTTP_STATUS.NOT_FOUND).send();
       }
 
@@ -101,8 +101,9 @@ class Category {
   editCategory = async (req, res) => {
     try {
       await checkValidationErrors(req);
+      const { workspace_id, category_id } = req.params;
 
-      const data = await CategoryService.edit(req.params.category_id, Category.CategoryData(req));
+      const data = await CategoryService.edit(category_id, workspace_id, Category.CategoryData(req));
 
       return res.status(HTTP_STATUS.OK).json(data)
     } catch (err) {

@@ -45,8 +45,6 @@ class Project {
         }
       );
 
-
-
       if (status) {
         switch (parseInt(status)) {
           case PROJECT_STATUS.ALL:

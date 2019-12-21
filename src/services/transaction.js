@@ -56,7 +56,7 @@ class Transaction {
     }
   ];
 
-  count = (where) => DB.Transaction.count({ where });
+  count = async (where) => DB.Transaction.count({ where });
 
   checkNegativeCash = async (workspace_id, data, reverse = false) => {
     const { currency_id, sum, type } = data;
