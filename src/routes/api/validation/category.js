@@ -1,15 +1,15 @@
 import { ACTION_CODE } from "../../../constants";
 import { check } from 'express-validator';
-import { checkTransactionType } from './utils';
+import { checkTransactionType, checkCategoryParentId } from './utils';
 
 const createCategory = [
   check('name', ACTION_CODE.EMPTY_FIELD_NAME)
     .exists()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('name', ACTION_CODE.EMPTY_FIELD_NAME)
+  check('parent_id', ACTION_CODE.EMPTY_FIELD_PARENT_ID)
     .optional()
-    .isNumeric(),
+    .custom(checkCategoryParentId),
   check('description', ACTION_CODE.EMPTY_FIELD_DESCRIPTION)
     .optional()
     .trim()
@@ -25,9 +25,9 @@ const editCategory = [
     .optional()
     .trim()
     .isLength({ min: 1, max: 255 }),
-  check('name', ACTION_CODE.EMPTY_FIELD_NAME)
+  check('parent_id', ACTION_CODE.EMPTY_FIELD_PARENT_ID)
     .optional()
-    .isNumeric(),
+    .custom(checkCategoryParentId),
   check('description', ACTION_CODE.EMPTY_FIELD_DESCRIPTION)
     .optional()
     .trim()

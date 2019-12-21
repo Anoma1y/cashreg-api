@@ -20,6 +20,12 @@ export const checkContragentType = type => {
 	throw new Error(ACTION_CODE.WRONG_CONTRAGENT_TYPE)
 };
 
+export const checkCategoryParentId = parent_id => {
+	if (typeof parent_id === 'number' || parent_id === null) return true;
+
+	throw new Error(ACTION_CODE.CATEGORY_PARENT_ID_TYPE_NOT_ALLOWED)
+};
+
 export const aboveZero = val => val > 0;
 
 export const arrayOfNumbers = arr => arr.every(it => Number.isInteger(it));
