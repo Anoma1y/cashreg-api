@@ -10,15 +10,7 @@ class Currency {
     try {
       await checkValidationErrors(req);
 
-      const data = await CurrencyService.getList({
-        attributes: {
-          exclude: [
-            'created_at',
-            'updated_at',
-          ]
-        },
-        json:true,
-      });
+      const data = await CurrencyService.getList();
 
       return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
@@ -31,15 +23,7 @@ class Currency {
       await checkValidationErrors(req);
 
       const { currency_id } = req.params;
-      const currency = await CurrencyService.getSingle(currency_id, {
-        attributes: {
-          exclude: [
-            'created_at',
-            'updated_at',
-          ]
-        },
-        json: true,
-      });
+      const currency = await CurrencyService.getSingle(currency_id);
 
       if (!currency) {
         return res.status(HTTP_STATUS.NOT_FOUND).send()
