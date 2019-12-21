@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import { dateToUnix } from "../helpers/index";
+import StructuredDataService from '../services/structuredData';
 
 export const attributes = {
   id: {
@@ -96,12 +97,9 @@ export default (sequelize) => {
     models.Project.belongsTo(models.Contragent, {
       foreignKey: 'contragent_id'
     });
-
-    // models.Transaction.belongsTo(models.Project, {
-    //   onDelete: 'CASCADE',
-    //   foreignKey: 'category_id',
-    // });
   };
+
+  StructuredDataService.withPagination(Project);
 
   return Project;
 }

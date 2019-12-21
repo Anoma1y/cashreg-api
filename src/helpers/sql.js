@@ -12,6 +12,22 @@ export const getMultipleOrder = (by_key, by_direct) => by_key.map((key, i) => ([
 	by_direct[i] || 'desc',
 ]));
 
+export const getOrder = (query = {}) => {
+	const order = Object.assign({
+		order_by_key: 'id',
+		order_by_direction: 'desc',
+	}, query);
+
+	return getMultipleOrder(
+		getMultipleQueryValues(order.order_by_key),
+		getMultipleQueryValues(order.order_by_direction)
+	);
+};
+
+export const getWhereNew = (query, opt) => {
+
+};
+
 export const getWhere = (query, opt = {}) => {
 	const {
 		search = [], // поиск по строке object[]: @key - столбец, @queryKey - query ключ

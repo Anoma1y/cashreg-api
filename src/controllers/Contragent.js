@@ -1,12 +1,12 @@
+import DB from '../config/db';
 import {
   setResponseError,
   checkValidationErrors,
 } from "../services/errors";
 import { removeEmpty } from '../helpers';
-import { getWhere } from '../helpers/sql';
+import { getWhere, getOrder } from '../helpers/sql';
 import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import ContragentService from '../services/contragent';
-import StructuredDataService from '../services/structuredData';
 
 class Contragent {
   static ContragentData = (req) => removeEmpty({
@@ -25,6 +25,7 @@ class Contragent {
       await checkValidationErrors(req);
 
       const { workspace_id } = req.params;
+      const { page, num_on_page } = req.query;
 
       const where = getWhere(
         req.query,
@@ -36,7 +37,14 @@ class Contragent {
 
       where['workspace_id'] = workspace_id;
 
-      const data = await StructuredDataService.withoutPagination(req, where, ContragentService.getList);
+      const options = {
+        page,
+        num_on_page,
+        where,
+        order: getOrder(req.query),
+      };
+
+      const data = await DB.Contragent.paginate(options);
 
       return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {

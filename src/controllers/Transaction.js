@@ -1,14 +1,14 @@
+import DB from '../config/db';
 import { Op } from 'sequelize';
 import {
   setResponseError,
   checkValidationErrors,
 } from "../services/errors";
-import { getWhere, } from '../helpers/sql';
+import { getWhere, getOrder } from '../helpers/sql';
 import { HTTP_STATUS } from '../constants';
 import { removeEmpty } from '../helpers';
 import TransactionService from '../services/transaction';
 import CashService from '../services/cash';
-import StructuredDataService from '../services/structuredData';
 
 class Transaction {
   static TransactionData = (req) => removeEmpty({
@@ -29,6 +29,7 @@ class Transaction {
   getTransactionList = async (req, res) => {
     try {
       await checkValidationErrors(req);
+      const { page, num_on_page } = req.query;
       const { workspace_id } = req.params;
 
       const where = getWhere(
@@ -49,7 +50,14 @@ class Transaction {
         [Op.eq]: null,
       };
 
-      const data = await StructuredDataService.withPagination(req, where, TransactionService.count, TransactionService.getList);
+      const options = {
+        page,
+        num_on_page,
+        where,
+        order: getOrder(req.query),
+      };
+
+      const data = await DB.Transaction.paginate(options);
 
       return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {

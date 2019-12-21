@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import StructuredDataService from '../services/structuredData';
 import { dateToUnix } from "../helpers/index";
 
 export const attributes = {
@@ -96,6 +97,8 @@ export default (sequelize) => {
       foreignKey: 'contragent_id'
     });
   };
+
+  StructuredDataService.withPagination(Contragent);
 
   return Contragent;
 }

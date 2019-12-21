@@ -1,9 +1,9 @@
+import DB from '../config/db';
 import { Op } from 'sequelize';
 import { removeEmpty } from '../helpers';
-import { getWhere } from '../helpers/sql';
+import { getWhere, getOrder } from '../helpers/sql';
 import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import ProjectService from '../services/project';
-import StructuredDataService from '../services/structuredData';
 import {
   setResponseError,
   checkValidationErrors,
@@ -31,7 +31,7 @@ class Project {
       await checkValidationErrors(req);
 
       const { workspace_id } = req.params;
-      const { status, start_date, end_date } = req.query;
+      const { status, start_date, end_date, num_on_page, page } = req.query;
 
       const startDate = start_date * 1000;
       const endDate = end_date * 1000;
@@ -94,7 +94,14 @@ class Project {
 
       where['workspace_id'] = workspace_id;
 
-      const data = await StructuredDataService.withoutPagination(req, where, ProjectService.getList);
+      const options = {
+        page,
+        num_on_page,
+        where,
+        order: getOrder(req.query),
+      };
+
+      const data = await DB.Project.paginate(options);
 
       return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
