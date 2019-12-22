@@ -24,6 +24,34 @@ export const getOrder = (query = {}) => {
 	);
 };
 
+function rawAndSeparate(state) {
+	return `${state ? 'and ' : ''}`;
+}
+
+function checkRawComma(str) {
+	return /[,]/g.test(str);
+}
+
+export function getRawWhere(field, val, separate = true) {
+	return val ? `${rawAndSeparate(separate)}${field} = ${val}` : '';
+}
+
+export function getRawWhereIn(field, str, separate = true) { // todo go to utils
+	if (!str) return '';
+
+	if (str === ',') {
+		str = '';
+	}
+
+	if (!checkRawComma(str)) {
+		return `${rawAndSeparate(separate)}${field} = ${str}`;
+	}
+
+	const formattedArray = str.split(',').filter(Boolean).join(',');
+
+	return `${rawAndSeparate(separate)}${field} in (${formattedArray})`;
+}
+
 export const getWhereNew = (query, opt) => {
 
 };

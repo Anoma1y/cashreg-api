@@ -86,23 +86,14 @@ class Transaction {
     try {
       await checkValidationErrors(req);
 
-      const {
-        params: {
-          workspace_id,
-        },
-        decoded: {
-          userId: user_id,
-        }
-      } = req;
-
       const transactionCreate = await TransactionService.createTransaction(
-        workspace_id,
-        user_id,
+        req.params.workspace_id,
+        req.decoded.userId,
         Transaction.TransactionData(req),
         Transaction.TransactionFiles(req),
       );
 
-      const transaction = await TransactionService.getSingle(transactionCreate.id, workspace_id);
+      const transaction = await TransactionService.getSingle(transactionCreate.id, req.params.workspace_id);
 
       // await redisDelAsync(`cash:${workspace_id}`);
 

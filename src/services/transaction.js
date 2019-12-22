@@ -17,7 +17,7 @@ class Transaction {
     {
       model: DB.Currency,
       attributes: {
-        exclude: ['created_at', 'updated_at'],
+        exclude: ['created_at', 'updated_at', 'value', 'nominal', 'enabled'],
       },
     },
     {
@@ -37,14 +37,6 @@ class Transaction {
       attributes: {
         exclude: ['password', 'created_at', 'updated_at'],
       },
-      include: [
-        {
-          model: DB.Profile,
-          attributes: {
-            exclude: ['created_at', 'updated_at', 'id'],
-          },
-        },
-      ],
     },
   ];
 
@@ -106,11 +98,11 @@ class Transaction {
       const category = await CategoryService.getSingle(data.category_id,workspace_id, { attributes: ['id', 'type'] });
 
       if (!category) {
-        throw new HttpError('CATEGORY_NOT_FOUND', 404);
+        throw new HttpError(ACTION_CODE.CATEGORY_NOT_FOUND, 404);
       }
 
       if (category.type !== data.type) {
-        throw new HttpError('CATEGORY_TYPE_NOT_MATCH', 404);
+        throw new HttpError(ACTION_CODE.CATEGORY_TYPE_NOT_MATCH, 404);
       }
     }
 
@@ -118,7 +110,7 @@ class Transaction {
       const contragent = await ContragentService.getSingle(data.contragent_id,workspace_id, { attributes: ['id'] });
 
       if (!contragent) {
-        throw new HttpError('CONTRAGENT_NOT_FOUND', 404);
+        throw new HttpError(ACTION_CODE.CONTRAGENT_NOT_FOUND, 404);
       }
     }
 
@@ -126,7 +118,7 @@ class Transaction {
       const project = await ProjectService.getSingle(data.project_id,workspace_id, { attributes: ['id'] });
 
       if (!project) {
-        throw new HttpError('PROJECT_NOT_FOUND', 404);
+        throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, 404);
       }
     }
 

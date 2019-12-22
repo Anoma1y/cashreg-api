@@ -12,7 +12,7 @@ class StructuredData {
 
 			const countOptions = Object.keys(options).reduce((acc, key) => {
 				if (!['order', 'attributes', 'include'].includes(key)) {
-					acc[key] = options[key]
+					acc[key] = options[key];
 				}
 
 				return acc
@@ -29,7 +29,13 @@ class StructuredData {
 
 			const data = await Model.findAll(options);
 
-			return { data, page_count, total_records, num_on_page: Number(num_on_page), page: Number(page) }
+			return {
+				data,
+				page_count,
+				total_records,
+				num_on_page: Number(num_on_page),
+				page: Number(page)
+			}
 		};
 
 		const instanceOrModel = Model.Instance || Model;
