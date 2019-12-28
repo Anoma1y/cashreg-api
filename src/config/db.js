@@ -33,7 +33,6 @@ const sequelizeOptions = {
     freezeTableName: false,
     timestamps: true,
   }
-
 };
 
 export const sequelize = new Sequelize(

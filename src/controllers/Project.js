@@ -99,6 +99,13 @@ class Project {
         num_on_page,
         where,
         order: getOrder(req.query),
+        attributes: {
+          exclude: ['contragent_id', 'workspace_id']
+        },
+        include: [{
+          model: DB.Contragent,
+          attributes: ['id', 'title', 'type', 'active']
+        }],
       };
 
       const data = await DB.Project.paginate(options);

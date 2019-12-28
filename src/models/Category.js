@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import { dateToUnix } from "../helpers/index";
+import StructuredDataService from '../services/structuredData';
 
 export const attributes = {
   id: {
@@ -89,5 +90,7 @@ export default (sequelize) => {
     });
   };
 
+  StructuredDataService.withPagination(Category);
+  
   return Category;
 }

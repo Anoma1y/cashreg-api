@@ -1,5 +1,6 @@
 import DB, { sequelize } from '../config/db';
 import { HttpError } from '../services/errors';
+import { TransactionInclude, TransactionIncludeSingle } from '../models/TransactionIncludes';
 import { HTTP_STATUS, ACTION_CODE } from '../constants';
 import CashService from './cash';
 import CategoryService from './category';
@@ -7,47 +8,6 @@ import ContragentService from './contragent';
 import ProjectService from './project';
 
 class Transaction {
-  static TransactionInclude = [
-    {
-      model: DB.Category,
-      attributes: {
-        exclude: ['workspace_id', 'created_at', 'updated_at', 'deleted_at'],
-      },
-    },
-    {
-      model: DB.Currency,
-      attributes: {
-        exclude: ['created_at', 'updated_at', 'value', 'nominal', 'enabled'],
-      },
-    },
-    {
-      model: DB.Contragent,
-      attributes: {
-        exclude: ['workspace_id', 'created_at', 'updated_at'],
-      },
-    },
-    {
-      model: DB.Workspace,
-      attributes: {
-        exclude: ['created_at', 'updated_at', 'deleted_at'],
-      },
-    },
-    {
-      model: DB.User,
-      attributes: {
-        exclude: ['password', 'created_at', 'updated_at'],
-      },
-    },
-  ];
-
-  static TransactionIncludeSingle = [
-    {
-      model: DB.File,
-      as: 'files',
-      through: { attributes: [] }
-    }
-  ];
-
   count = async (where) => DB.Transaction.count({ where });
 
   checkNegativeCash = async (workspace_id, data, reverse = false) => {
@@ -69,8 +29,8 @@ class Transaction {
         exclude: expand ? [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id'] : [],
       },
       include: expand ? [
-        ...Transaction.TransactionInclude,
-        ...Transaction.TransactionIncludeSingle,
+        ...TransactionInclude,
+        ...TransactionIncludeSingle,
       ] : [],
       json: true,
     });
@@ -81,7 +41,7 @@ class Transaction {
       attributes: {
         exclude: [ 'user_id', 'workspace_id', 'contragent_id', 'category_id', 'currency_id', ],
       },
-      include: expand ? Transaction.TransactionInclude : [],
+      include: expand ? TransactionInclude : [],
       json:true,
       ...options,
     })
@@ -98,11 +58,11 @@ class Transaction {
       const category = await CategoryService.getSingle(data.category_id,workspace_id, { attributes: ['id', 'type'] });
 
       if (!category) {
-        throw new HttpError(ACTION_CODE.CATEGORY_NOT_FOUND, 404);
+        throw new HttpError(ACTION_CODE.CATEGORY_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
 
       if (category.type !== data.type) {
-        throw new HttpError(ACTION_CODE.CATEGORY_TYPE_NOT_MATCH, 404);
+        throw new HttpError(ACTION_CODE.CATEGORY_TYPE_NOT_MATCH, HTTP_STATUS.CONFLICT);
       }
     }
 
@@ -110,7 +70,7 @@ class Transaction {
       const contragent = await ContragentService.getSingle(data.contragent_id,workspace_id, { attributes: ['id'] });
 
       if (!contragent) {
-        throw new HttpError(ACTION_CODE.CONTRAGENT_NOT_FOUND, 404);
+        throw new HttpError(ACTION_CODE.CONTRAGENT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
     }
 
@@ -118,7 +78,7 @@ class Transaction {
       const project = await ProjectService.getSingle(data.project_id,workspace_id, { attributes: ['id'] });
 
       if (!project) {
-        throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, 404);
+        throw new HttpError(ACTION_CODE.PROJECT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
       }
     }
 

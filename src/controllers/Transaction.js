@@ -4,6 +4,7 @@ import {
   setResponseError,
   checkValidationErrors,
 } from "../services/errors";
+import { TransactionInclude, TransactionIncludeSingle } from '../models/TransactionIncludes';
 import { getWhere, getOrder } from '../helpers/sql';
 import { HTTP_STATUS } from '../constants';
 import { removeEmpty } from '../helpers';
@@ -55,6 +56,7 @@ class Transaction {
         num_on_page,
         where,
         order: getOrder(req.query),
+        include: TransactionInclude
       };
 
       const data = await DB.Transaction.paginate(options);

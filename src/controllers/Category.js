@@ -1,12 +1,12 @@
+import DB from '../config/db';
 import {
   setResponseError,
   checkValidationErrors,
 } from "../services/errors";
 import { HTTP_STATUS, ACTION_CODE } from '../constants';
-import { getWhere } from '../helpers/sql';
+import { getWhere, getOrder } from '../helpers/sql';
 import { removeEmpty } from '../helpers';
 import CategoryService from '../services/category';
-import StructuredDataService from '../services/structuredData';
 
 class Category {
   static CategoryData = (req) => removeEmpty({
@@ -21,6 +21,7 @@ class Category {
       await checkValidationErrors(req);
 
       const { workspace_id } = req.params;
+      const { num_on_page, page } = req.query;
 
       const where = getWhere(
         req.query,
@@ -38,7 +39,24 @@ class Category {
 
       where['workspace_id'] = workspace_id;
 
-      const data = await StructuredDataService.withoutPagination(req, where, CategoryService.getList);
+      const options = {
+        page,
+        num_on_page,
+        where,
+        order: getOrder(req.query),
+        attributes: {
+          exclude: ['workspace_id', 'parent_id'],
+        },
+        include: [{
+          model: DB.Category,
+          as: 'children',
+          attributes: {
+            exclude: ['type', 'workspace_id', 'parent_id'],
+          }
+        }],
+      };
+
+      const data = await DB.Category.paginate(options);
 
       return res.status(HTTP_STATUS.OK).json(data);
     } catch (err) {
